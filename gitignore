@@ -154,4 +154,4 @@ nosetests.xml # Test results
 *.log         # Log files
 
 # CSV
-train.csv
+data/train.csv
