@@ -153,5 +153,6 @@ __pycache__/  # Python cache files
 nosetests.xml # Test results
 *.log         # Log files
 
-# CSV
+# Large Files
 data/train.csv
+**/*.pkl
