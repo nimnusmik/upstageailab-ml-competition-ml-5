@@ -1,6 +1,9 @@
-##### Title: "[YYMMDD] - What I learned today?_이름"
-- ex. [250707] What I learned today?_yoonjeong
-##### label: TIL
+---
+name: 📝 TIL
+about: 오늘 배운 것 정리
+title: "[TIL] YYYY-MM-DD - 제목"
+labels: TIL
+---
 
 ## 📌 오늘 배운 것 (What I Learned Today)
 경진대회 준비를 하면서 배운 점을 **각자의 이슈를 생성해서** 작성해주세요.
