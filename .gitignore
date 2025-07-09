@@ -155,4 +155,5 @@ nosetests.xml # Test results
 
 # Large Files
 **/train.csv
+**/train_coordinate_geocoded.csv
 **/*.pkl
