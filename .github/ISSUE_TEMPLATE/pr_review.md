@@ -5,6 +5,8 @@ title: "[REVIEW] PR 제목 요약_날짜_이름"
 labels: pr-review
 ---
 
+제목 예시: [REVIEW] 데이터 전처리 함수 추가_2025-07-09_김선민
+
 ### 🔍 PR 요약
 
 - 작업 브랜치: `feature/예시`
