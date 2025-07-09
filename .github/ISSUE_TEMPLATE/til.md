@@ -1,7 +1,7 @@
 ---
 name: 📝 TIL
 about: 오늘 배운 것 정리
-title: "[TIL] YYYY-MM-DD - 제목"
+title: "[TIL] YYYY-MM-DD - 이름"
 labels: TIL
 ---
 
