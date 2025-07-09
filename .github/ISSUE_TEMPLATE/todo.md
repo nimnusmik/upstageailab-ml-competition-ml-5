@@ -1,7 +1,7 @@
 ---
 name: 📝 Todo List
 about: 해야 할 작업 정리
-title: "[TODO] 작업 제목 또는 날짜"
+title: "[TODO] 작업 제목_날짜_이름"
 labels: todo
 ---
 
