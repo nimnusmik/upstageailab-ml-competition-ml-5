@@ -133,12 +133,3 @@ print(subway_rawdf.head(), "\n")
 
 print(loanrate_df.head(), "\n")
 print(population_df.head(), "\n")
-
-
-
-
-
-
-#%%
-# export package used
-# %pip freeze > requirements.txt
