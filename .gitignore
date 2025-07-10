@@ -162,3 +162,4 @@ nosetests.xml # Test results
 !data/**/train_small_size.csv
 !data/**/train_missing_summary.csv
 !data/**/train_road_missing_summary.csv
+!data/**/train_geocoded_test.csv
