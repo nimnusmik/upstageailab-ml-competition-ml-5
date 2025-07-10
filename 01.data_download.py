@@ -51,7 +51,7 @@ else: pass
 loanrate_filename = 'loanrate.csv'
 loanrate_path = os.path.join(rawdata_dir, loanrate_filename)
 # API_key = 'KOSIS-APIKey'
-API_key = 'N2YzYmIyY2U3ZTJiNjVhODk5NmUxZjYxYjk3MDRlZGE='
+API_key = 'API-Key'
 
 if not os.path.exists(loanrate_path):
     # url을 통해 json 데이터 가져오기
@@ -61,21 +61,20 @@ if not os.path.exists(loanrate_path):
         json_file = url.read()
         
     py_json = json.loads(json_file.decode('utf-8'))
-
     month_list = []
     loanrate_list = []
 
     for i in py_json:
-        if i['C1_NM'] == '가계대출':
+        if i['C1_NM'] == '주택담보대출':
             month_list.append(i['PRD_DE'])
             loanrate_list.append(i['DT'])
 
     loanrate_df = pd.DataFrame({'month': month_list, 'loanrate': loanrate_list})
     loanrate_df.to_csv(loanrate_path, index=False)
 
-        
-# display(loanrate_df)
-# display(py_json[:5])
+#%%
+display(loanrate_df)
+display(py_json[:5])
 
 
 #%%
@@ -84,7 +83,7 @@ if not os.path.exists(loanrate_path):
 
 population_filename = 'population.csv'
 population_path = os.path.join(rawdata_dir, population_filename)
-API_key = 'N2YzYmIyY2U3ZTJiNjVhODk5NmUxZjYxYjk3MDRlZGE='
+API_key = 'API-Key'
 
 if not os.path.exists(population_path):
     # url을 통해 json 데이터 가져오기
