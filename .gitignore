@@ -154,7 +154,7 @@ nosetests.xml # Test results
 *.log         # Log files
 
 # 필요한 log 파일 제외
-!data/logs/*.log
+!data/logs/**/*.log
 
 # Large Files
 **/train*.csv
