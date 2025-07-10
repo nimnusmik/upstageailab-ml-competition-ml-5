@@ -192,6 +192,22 @@ df['사용허가여부'] = [1 if i == 'Y' else 0 for i in df['사용허가여부
 
 
 
+#%%
+# # 건축년도 2개 이상인 건에 대한 검사
+# df['시군구 아파트명'] = df['시군구'] + ' ' + df['아파트명']
+# df_group = df.groupby(['시군구 아파트명', '도로명'])['건축년도'].nunique().reset_index()
+# df_group.rename(columns= {'건축년도': '건축년도 개수'}, inplace=True)
+# multi_year = df_group[df_group['건축년도 개수'] > 1]
+# apt_list = multi_year['시군구 아파트명'].unique()
+
+# print(apt_list)
+# # print(multi_year)
+
+# df_merge = pd.merge(df, multi_year, how='inner', on=('시군구 아파트명', '도로명'))
+# df_merge[['계약년월','시군구','아파트명','도로명','건축년도']]
+# inspect_multi_year = df_merge.groupby(['시군구', '아파트명', '도로명', ])['건축년도'].agg(set).reset_index()
+# inspect_multi_year
+
 
 
 #%%
@@ -202,6 +218,8 @@ df['연식'] = df['계약년도'] - df['건축년도']
 # df[df['연식'] < 0]
 df['연식'] = df['연식'].clip(lower=0)
 
+
+
 #%%
 ## 아파트 이름 길이
 df['아파트이름길이'] = [len(i) for i in df['아파트명']]
@@ -210,38 +228,39 @@ df['아파트이름길이'].describe()
 
 
 
-
-
-
 #%%
 # 외부데이터 추가
 
 # 인구수 데이터 추가
-population_df
+population_pivot_df = population_df.pivot(index=['year', 'area'], columns='class', values='population').reset_index()
 
-# 자치구별 인구수
+# 성비
+population_pivot_df['성비(남/여)'] = round(population_pivot_df['남자인구수'] / population_pivot_df['여자인구수'], 4)
+# print(population_pivot_df.head())
 
-
+df = pd.merge(df, population_pivot_df, how = 'left', left_on=('계약년도', '자치구'), right_on=('year', 'area'))
 
 
 
 #%%
 # 대출금리 데이터 추가
-loanrate_df
+# 직전 1개월, 직전 3개월 이동평균, 직전 6개월 이동평균, 직전 1년 이동평균 주택담보대출금리
+loanrate_df['loanrate_1m'] = loanrate_df['loanrate'].shift(1)
+loanrate_df['loanrate_3m'] = round(loanrate_df['loanrate'].shift(1).rolling(window=3).mean(), 2)
+loanrate_df['loanrate_6m'] = round(loanrate_df['loanrate'].shift(1).rolling(window=6).mean(), 2)
+loanrate_df['loanrate_12m'] = round(loanrate_df['loanrate'].shift(1).rolling(window=12).mean(), 2)
 
-# 직전 1개월, 직전 3개월 이동평균, 직전 6개월 이동평균, 직전 1년 이동평균
+# print(loanrate_df.head())
 
-
-
-
-
+df = pd.merge(df, loanrate_df, how = 'left', left_on = '계약년월', right_on = 'month')
+# print(df.head())
 
 
 
 
 #%%
 # 최종적으로 사용할 변수
-final_columns = ['계약일자', '계약년월', '계약년도', '계약월'
+final_columns = ['계약일자', '계약년월', '계약년도', '계약월',
                 '자치구', '법정동', 
                 '전용면적',
                 '연식',                   # 건축년도 -> 연식으로 대체
@@ -271,17 +290,17 @@ final_columns = ['계약일자', '계약년월', '계약년도', '계약월'
 
 
                 # 인구수관련 변수
-
+                '총인구수',
+                '성비(남/여)',
 
 
                 # 대출금리 변수 
-
+                'loanrate_1m', 'loanrate_3m', 'loanrate_6m', 'loanrate_12m'
 
 
                 # target, train/test 구분 변수
                 'target',
-                'isTest' 
-                ]
+                'isTest']
 
 
 #%%
