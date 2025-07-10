@@ -153,9 +153,12 @@ __pycache__/  # Python cache files
 nosetests.xml # Test results
 *.log         # Log files
 
-# 필요한 log 파일 제외
-!data/logs/**/*.log
-
 # Large Files
 **/train*.csv
 **/*.pkl
+
+# 필요한 파일 제외
+!data/logs/**/*.log
+!data/**/train_small_size.csv
+!data/**/train_missing_summary.csv
+!data/**/train_road_missing_summary.csv
