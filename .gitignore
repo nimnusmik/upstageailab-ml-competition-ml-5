@@ -157,6 +157,7 @@ nosetests.xml # Test results
 .vscode
 data/raw/train.csv
 **/train_geocoded.csv
+data/processed/geocoding-missing-coords/train_geocoded_train.csv
 **/*.pkl
 
 # 제외 되면 안되는 필요한 파일 예외처리
