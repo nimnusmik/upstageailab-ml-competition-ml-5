@@ -154,8 +154,10 @@ nosetests.xml # Test results
 *.log         # Log files
 
 # 제외 시킬 파일 (대용량, 기타 이유 등)
+data/raw/basefile.tar
 .vscode
 data/raw/train.csv
+cleaned_data/train_clean.csv
 **/train_geocoded.csv
 data/processed/geocoding-missing-coords/train_geocoded_train.csv
 **/*.pkl
