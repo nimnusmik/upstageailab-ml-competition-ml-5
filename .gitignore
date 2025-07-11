@@ -155,14 +155,8 @@ nosetests.xml # Test results
 
 # 제외 시킬 파일
 .vscode
-**/train*.csv
+data/raw/train.csv
 **/*.pkl
 
 # 제외 되면 안되는 필요한 파일 예외처리
 !data/logs/**/*.log
-!data/**/train_small_size.csv
-!data/**/train_missing_summary.csv
-!data/**/train_road_missing_summary.csv
-!data/**/train_geocoded_test.csv
-!data/**/train_transportation_features.csv
-!data/**/test_transportation_features.csv
