@@ -164,4 +164,5 @@ nosetests.xml # Test results
 !data/**/train_missing_summary.csv
 !data/**/train_road_missing_summary.csv
 !data/**/train_geocoded_test.csv
-!data/**/train_transportation_test_features.csv
+!data/**/train_transportation_features.csv
+!data/**/test_transportation_features.csv
