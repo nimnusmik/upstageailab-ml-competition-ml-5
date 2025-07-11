@@ -48,7 +48,7 @@ else: pass
 #%%
 # import & save external data - 대출금리 데이터
 
-loanrate_filename = 'loanrate.csv'
+loanrate_filename = '../../data/raw/loanrate.csv'
 loanrate_path = os.path.join(rawdata_dir, loanrate_filename)
 # API_key = 'KOSIS-APIKey'
 API_key = 'API-Key'
@@ -81,7 +81,7 @@ display(py_json[:5])
 # import & save external data - 인구수 데이터
 # 년단위 자료입니다 (월별자료는 2011년부터 존재)
 
-population_filename = 'population.csv'
+population_filename = '../../data/raw/population.csv'
 population_path = os.path.join(rawdata_dir, population_filename)
 API_key = 'API-Key'
 
@@ -115,13 +115,13 @@ if not os.path.exists(population_path):
 
 #%%
 # import raw datasets
-train_rawdf = pd.read_csv('./rawdata/train.csv', dtype = {16: 'str', 17: 'str', 36: 'str'})
-test_rawdf = pd.read_csv('./rawdata/test.csv')
-bus_rawdf = pd.read_csv('./rawdata/bus_feature.csv')
-subway_rawdf = pd.read_csv('./rawdata/subway_feature.csv')
+train_rawdf = pd.read_csv('../../data/raw/train.csv', dtype = {16: 'str', 17: 'str', 36: 'str'})
+test_rawdf = pd.read_csv('../../data/raw/test.csv')
+bus_rawdf = pd.read_csv('../../data/raw/bus_feature.csv')
+subway_rawdf = pd.read_csv('../../data/raw/subway_feature.csv')
 
-loanrate_df = pd.read_csv('./rawdata/loanrate.csv')
-population_df = pd.read_csv('./rawdata/population.csv')
+loanrate_df = pd.read_csv('../../data/raw/loanrate.csv')
+population_df = pd.read_csv('../../data/raw/population.csv')
 
 
 print(train_rawdf.head(), "\n")
