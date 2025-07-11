@@ -29,7 +29,7 @@ for font in krfont:
         mpl.rc('font', family=font)
 
 # make data folder
-rawdata_dir = 'rawdata'
+rawdata_dir = '../../data/raw'
 os.makedirs(rawdata_dir, exist_ok=True)
 
 
@@ -48,7 +48,7 @@ else: pass
 #%%
 # import & save external data - 대출금리 데이터
 
-loanrate_filename = '../../data/raw/loanrate.csv'
+loanrate_filename = 'loanrate.csv'
 loanrate_path = os.path.join(rawdata_dir, loanrate_filename)
 # API_key = 'KOSIS-APIKey'
 API_key = 'API-Key'
@@ -81,7 +81,7 @@ display(py_json[:5])
 # import & save external data - 인구수 데이터
 # 년단위 자료입니다 (월별자료는 2011년부터 존재)
 
-population_filename = '../../data/raw/population.csv'
+population_filename = 'population.csv'
 population_path = os.path.join(rawdata_dir, population_filename)
 API_key = 'API-Key'
 
