@@ -29,7 +29,6 @@ population_df = pd.read_csv('./rawdata/population.csv')
 
 
 
-
 #%%
 # 사용할 column 선택
 train_rawdf['isTest'] = 0
@@ -48,7 +47,8 @@ columns = [ # 처리한 변수
         # 'k-연면적',
          
         # 처리 안 된 변수 중 결측치 많은 변수
-        '주차대수', 'k-전체동수', 'k-건설사(시공사)',
+        '주차대수', 'k-전체동수', 
+        'k-건설사(시공사)',
         'k-난방방식', 'k-관리방식', 'k-복도유형', 'k-전체세대수', 
 
         # target 및 train/test 구분
@@ -73,9 +73,6 @@ df_original = df.copy()
 # 아파트명 쓰지 말고 아파트이름길이?
 # 해제발생여부 column 삭제 : 크게 차이 없음, 21년부터 시행
 # df[df['연식'] < 0] (분양권 매매) 에 대한 구별?
-
-
-
 
 
 
@@ -115,8 +112,7 @@ df['법정동'] = pd.Series(area)
 
 # tmp = [i for i in df['동'].unique() if i.endswith('가')]
 # print(tmp)
-
-
+# print(df['자치구'].unique())
 
 
 
@@ -223,7 +219,7 @@ df['연식'] = df['연식'].clip(lower=0)
 #%%
 ## 아파트 이름 길이
 df['아파트이름길이'] = [len(i) for i in df['아파트명']]
-df['아파트이름길이'].describe()
+# print(df['아파트이름길이'].describe())
 
 
 
@@ -258,55 +254,91 @@ df = pd.merge(df, loanrate_df, how = 'left', left_on = '계약년월', right_on 
 
 
 
+
 #%%
-# 최종적으로 사용할 변수
+highend_aptlist = ['디에이치', '아크로', '써밋', '트리마제', '르엘', '푸르지오써밋', '위브더제니스']
+premium_aptlist = ['삼성', '현대', '대우', '대림', 'GS', '지에스', '포스코', '롯데', 'SK', '에스케이', '한화']
+# 출처: 한국기업평판연구소 브랜드평판지수 https://brikorea.com/
+
+df['브랜드등급'] = '기타'
+
+df.loc[df['아파트명'].str.contains('|'.join(highend_aptlist), case=False, na=False), '브랜드등급'] = '하이엔드'
+
+df.loc[(df['브랜드등급'] == '기타') & df['건설사'].str.contains('|'.join(premium_aptlist), case=False, na=False), '브랜드등급'] = '프리미엄'
+
+
+a = df[df['브랜드등급'] == '하이엔드'][['시군구','아파트명','단지분류','건설사','브랜드등급']]
+display(a)
+b = df[df['브랜드등급'] == '프리미엄'][['시군구','아파트명','단지분류','브랜드등급']]
+display(b)
+
+
+
+
+
+#%%
+# grouped = df.groupby(['계약년도','자치구'])['target'].median().reset_index()
+# sns.lineplot(data=grouped, x='계약년도', y='target',hue='자치구', palette='Set2')
+# plt.legend(loc='lower left')
+# plt.show()
+
+premium_areas = ['강남구', '서초구', '송파구']
+df['강남3구여부'] = df['자치구'].isin(premium_areas).astype(int)
+
+# df[df['지역프리미엄'] == 1]
+
+
+
+#%%
+
+df.info()
+
+#%%
 final_columns = ['계약일자', '계약년월', '계약년도', '계약월',
                 '자치구', '법정동', 
                 '전용면적',
                 '연식',                   # 건축년도 -> 연식으로 대체
                 '층',
-                '단지분류',
                 '홈페이지유무',
                 '사용허가여부',
+                '브랜드등급',
                 '아파트이름길이',          # 아파트명 -> 아파트이름길이
-
-
-                # 결축치 및 변수확인 후 추가
-                '주차대수',
-                '전체동수',
-                '건설사',
-                '난방방식',
-                '관리방식',
-                '복도유형',
+                '강남3구여부',
                 '전체세대수',
                 
-
                 # 지하철관련 변수
-                
-
+                # '지하철최단거리'
+                # '반경_1km_지하철역_수'
+                # '반경_500m_지하철역_수'
+                # '반경_300m_지하철역_수'
 
                 # 버스관련 변수
-
-
+                # '버스최단거리'
+                # '반경_1km_버스정류장_수'
+                # '반경_500m_버스정류장_수'
+                # '반경_300m_버스정류장_수'
 
                 # 인구수관련 변수
                 '총인구수',
                 '성비(남/여)',
 
-
                 # 대출금리 변수 
-                'loanrate_1m', 'loanrate_3m', 'loanrate_6m', 'loanrate_12m'
-
+                'loanrate_1m', 'loanrate_3m', 'loanrate_6m', 'loanrate_12m',
 
                 # target, train/test 구분 변수
                 'target',
                 'isTest']
 
 
+
+
 #%%
 cleandf = df[final_columns]
 train_clean = cleandf[cleandf['isTest'] == 0]
 test_clean = cleandf[cleandf['isTest'] == 1]
+
+
+train_clean.info()
 
 
 #%%
@@ -321,8 +353,5 @@ testdata_filename = 'test_clean.csv'
 traindata_path = os.path.join(data_dir, traindata_filename)
 testdata_path = os.path.join(data_dir, testdata_filename)
 
-if not os.path.exists(traindata_filename):
-    train_clean.to_csv(traindata_path, index=False)
-
-if not os.path.exists(testdata_path):
-    test_clean.to_csv(testdata_path, index=False)
+train_clean.to_csv(traindata_path, index=False)
+test_clean.to_csv(testdata_path, index=False)
