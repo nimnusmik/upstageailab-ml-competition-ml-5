@@ -153,9 +153,10 @@ __pycache__/  # Python cache files
 nosetests.xml # Test results
 *.log         # Log files
 
-# 제외 시킬 파일
+# 제외 시킬 파일 (대용량, 기타 이유 등)
 .vscode
 data/raw/train.csv
+**/train_geocoded.csv
 **/*.pkl
 
 # 제외 되면 안되는 필요한 파일 예외처리
