@@ -20,12 +20,12 @@ for font in krfont:
 
 #%%
 # import data
-train_rawdf = pd.read_csv('./rawdata/train.csv', dtype = {16: 'str', 17: 'str', 36: 'str'})
-test_rawdf = pd.read_csv('./rawdata/test.csv')
-bus_rawdf = pd.read_csv('./rawdata/bus_feature.csv')
-subway_rawdf = pd.read_csv('./rawdata/subway_feature.csv')
-loanrate_df = pd.read_csv('./rawdata/loanrate.csv')
-population_df = pd.read_csv('./rawdata/population.csv')
+train_rawdf = pd.read_csv('../../data/raw/train.csv', dtype = {16: 'str', 17: 'str', 36: 'str'})
+test_rawdf = pd.read_csv('../../data/raw/test.csv')
+bus_rawdf = pd.read_csv('../../data/raw/bus_feature.csv')
+subway_rawdf = pd.read_csv('../../data/raw/subway_feature.csv')
+loanrate_df = pd.read_csv('../../data/raw/loanrate.csv')
+population_df = pd.read_csv('../../data/raw/population.csv')
 
 
 
@@ -344,8 +344,8 @@ data_dir = 'cleaned_data'
 os.makedirs(data_dir, exist_ok=True)
 
 # save 'train_clean.csv' and 'test_clean.csv'
-traindata_filename = 'train_clean.csv'
-testdata_filename = 'test_clean.csv'
+traindata_filename = '../../data/processed/train_clean.csv'
+testdata_filename = '../../data/processed/test_clean.csv'
 
 traindata_path = os.path.join(data_dir, traindata_filename)
 testdata_path = os.path.join(data_dir, testdata_filename)
