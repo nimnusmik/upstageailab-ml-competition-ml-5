@@ -44,7 +44,7 @@ columns = [ # 처리한 변수
         'k-단지분류(아파트,주상복합등등)', 'k-홈페이지', '사용허가여부',
 
         # 처리중 변수
-        '도로명', '좌표X', '좌표Y',                                         
+        '본번', '부번', '번지', '도로명', '좌표X', '좌표Y',                                         
         # '해제사유발생일',                                                                                                                                    
         # 'k-연면적',
          
@@ -63,7 +63,7 @@ df.columns = [col[2:] if col.startswith('k-') else col for col in df.columns]
 df = df.rename(columns = {'전용면적(㎡)' : '전용면적',
                           '건설사(시공사)' : '건설사',
                           '단지분류(아파트,주상복합등등)' : '단지분류'})
-# print(df.columns)
+print(df.columns)
 # df.info()
 
 df_original = df.copy()
@@ -312,11 +312,84 @@ df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
 
 
 #%%
+# df.info()
+
+
+#%%
+# 교통정보가 결측값인 행들에 대해 본번과 부번을 이용하여 대체합니다.
+# case1. 본번과 부번이 같은 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
+# case2. 본번이 같지만 부번이 1 차이나는 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
+
+# 가령
+# 교통정보가 결측치인 행이 본번 123, 부번 12, 번지 12-34 를 갖고 있다면
+# 본번 123, 부번 12인 값들이 있는 경우 (case1) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
+# 없다면 본번 123, 부번이 10~14인 값들이 있는 경우 (case2) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
+
+transport_cols = [
+    '지하철최단거리',
+    '반경_1km_지하철역_수',
+    '반경_500m_지하철역_수',
+    '반경_300m_지하철역_수',
+    '버스최단거리',
+    '반경_1km_버스정류장_수',
+    '반경_500m_버스정류장_수',
+    '반경_300m_버스정류장_수'
+]
+
+# 교통정보가 결측값 아닌 행 추출
+trans_nonnull_df = df.dropna(subset=transport_cols)
+
+# 교통정보가 결측값인 행 추출
+missing_rows = df[df[transport_cols].isna().any(axis=1)]
+print('교통정보가 결측값인 행들에 대한 본번, 부번, 번지:')
+display(missing_rows[['본번','부번','번지']])
+
+#%%
+# 결측치 채우기
+from tqdm import tqdm
+
+for idx, row in tqdm(missing_rows.iterrows(), total=len(missing_rows)):
+    di1, di2, di3 = row['본번'], row['부번'], row['번지']
+    
+    case1 = trans_nonnull_df[
+        (trans_nonnull_df['본번'] == di1) &
+        (trans_nonnull_df['부번'] == di2)
+    ][transport_cols].drop_duplicates()
+    if not case1.empty:
+        mean_vals = case1.mean()
+
+    else:
+        case2 = trans_nonnull_df[
+            (trans_nonnull_df['본번'] == di1) &
+            (trans_nonnull_df['부번'].between(di2 - 2, di2 + 2))
+        ][transport_cols].drop_duplicates()
+        if not case2.empty:
+            mean_vals = case2.mean()
+        else:
+            continue
+
+    for col in transport_cols:
+        if pd.isna(df.loc[idx, col]):
+            df.loc[idx, col] = mean_vals[col]
+
+
+df.info()
+
+
+#%%
+print("train 데이터에 대한 결측치 확인")
+display(df[df['isTest'] == 0].info())
+
+print("test 데이터에 대한 결측치 확인")
+display(df[df['isTest'] == 1].info())
+
+
+
+#%%
 # 최근 1개월, 3개월, 6개월, 1년간 해당 아파트의 거래건수
 df['계약년월'] = pd.to_datetime(df['계약년월'], format='%Y%m', errors='coerce').dt.to_period('M').dt.to_timestamp()
 df = df.sort_values(['아파트명', '계약년월'])
 
-from tqdm import tqdm
 tqdm.pandas()
 
 def count_past_transactions(group, months):
@@ -342,16 +415,26 @@ df = pd.concat([df, monthly_counts_df], axis=1)
 
 
 #%%
+# 파일 저장
+df.to_csv('../../cleaned_data/total_clean.csv', index=False, encoding='utf-8')
+
+
+
+#%%
+df = pd.read_csv('../../cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
+df.info()
+
 final_columns = [
                 # 날짜(계약일 관련 변수)
                 '계약일자', '계약년월', '계약년도', '계약월',
 
                 # 위치 변수
                 '자치구', '법정동', 
+                '본번', '부번', '번지', '도로명',     # 모델링에 쓰일 변수 아님. 03.row_clean.py에서 결측치 보간에 이용할 변수
                 '강남3구여부',
                 
                 # 아파트 특성 변수
-                '아파트명',
+                '아파트명',                         # 모델링에 쓰일 변수 아님. 03.row_clean.py에서 결측치 제거에 이용할 변수
                 '전용면적',
                 '층',
                 '홈페이지유무',
@@ -414,8 +497,8 @@ testdata_filename = 'test_clean.csv'
 traindata_path = os.path.join(data_dir, traindata_filename)
 testdata_path = os.path.join(data_dir, testdata_filename)
 
-train_clean.to_csv(traindata_path, index=False)
-test_clean.to_csv(testdata_path, index=False)
+train_clean.to_csv(traindata_path, index=False, encoding='utf-8')
+test_clean.to_csv(testdata_path, index=False, encoding='utf-8')
 
 
 # %%
