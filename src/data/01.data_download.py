@@ -70,7 +70,7 @@ if not os.path.exists(loanrate_path):
             loanrate_list.append(i['DT'])
 
     loanrate_df = pd.DataFrame({'month': month_list, 'loanrate': loanrate_list})
-    loanrate_df.to_csv(loanrate_path, index=False)
+    loanrate_df.to_csv(loanrate_path, index=False, encoding='utf-8')
 
 
 #%%
@@ -103,7 +103,7 @@ if not os.path.exists(population_path):
             class_list.append(i['ITM_NM'])
 
     population_df = pd.DataFrame({'year': year_list, 'area': area_list, 'class': class_list, 'population': pop_list})
-    population_df.to_csv(population_path, index=False)
+    population_df.to_csv(population_path, index=False, encoding='utf-8')
 
 # display(population_df)
 # display(py_json[100:102])
