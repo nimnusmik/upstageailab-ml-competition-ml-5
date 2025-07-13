@@ -17,6 +17,8 @@ for font in krfont:
     if font in fontlist:
         mpl.rc('font', family=font)
 
+# 현재 파일경로 확인
+print(os.getcwd()) 
 
 #%%
 # import data
@@ -65,17 +67,6 @@ df = df.rename(columns = {'전용면적(㎡)' : '전용면적',
 # df.info()
 
 df_original = df.copy()
-
-
-########## 논의사항 ###########
-# k-연면적 삭제 : 매매가에 크게 상관 없는 변수
-# 도로명, 좌표X, 좌표Y는 버스, 지하철 등 데이터 병합한 후 drop해도 될 듯 
-# 아파트명 쓰지 말고 아파트이름길이?
-# 해제발생여부 column 삭제 : 크게 차이 없음, 21년부터 시행
-# df[df['연식'] < 0] (분양권 매매) 에 대한 구별?
-
-
-
 
 
 #%%
@@ -133,7 +124,7 @@ df['아파트명'] = [i if type(i) == str else '' for i in df['아파트명']]
 # print(df['단지분류'].unique()) # 5
 
 df['단지분류'] = [i if type(i) == str else '기타' for i in df['단지분류']]
-print(df['단지분류'].unique())
+# print(df['단지분류'].unique())
 
 
 
@@ -227,9 +218,8 @@ df['아파트이름길이'] = [len(i) for i in df['아파트명']]
 #%%
 # 외부데이터 추가
 
-# 인구수 데이터 추가
+## 인구수 데이터 추가
 population_pivot_df = population_df.pivot(index=['year', 'area'], columns='class', values='population').reset_index()
-
 # 성비
 population_pivot_df['성비(남/여)'] = round(population_pivot_df['남자인구수'] / population_pivot_df['여자인구수'], 4)
 # print(population_pivot_df.head())
@@ -239,7 +229,7 @@ df = pd.merge(df, population_pivot_df, how = 'left', left_on=('계약년도', '�
 
 
 #%%
-# 대출금리 데이터 추가
+## 대출금리 데이터 추가
 # 직전 1개월, 직전 3개월 이동평균, 직전 6개월 이동평균, 직전 1년 이동평균 주택담보대출금리
 loanrate_df['loanrate_1m'] = loanrate_df['loanrate'].shift(1)
 loanrate_df['loanrate_3m'] = round(loanrate_df['loanrate'].shift(1).rolling(window=3).mean(), 2)
@@ -256,27 +246,28 @@ df = pd.merge(df, loanrate_df, how = 'left', left_on = '계약년월', right_on 
 
 
 #%%
+# 아파트 브랜드등급 추가
 highend_aptlist = ['디에이치', '아크로', '써밋', '트리마제', '르엘', '푸르지오써밋', '위브더제니스']
 premium_aptlist = ['삼성', '현대', '대우', '대림', 'GS', '지에스', '포스코', '롯데', 'SK', '에스케이', '한화']
 # 출처: 한국기업평판연구소 브랜드평판지수 https://brikorea.com/
 
 df['브랜드등급'] = '기타'
-
 df.loc[df['아파트명'].str.contains('|'.join(highend_aptlist), case=False, na=False), '브랜드등급'] = '하이엔드'
-
 df.loc[(df['브랜드등급'] == '기타') & df['건설사'].str.contains('|'.join(premium_aptlist), case=False, na=False), '브랜드등급'] = '프리미엄'
 
 
-a = df[df['브랜드등급'] == '하이엔드'][['시군구','아파트명','단지분류','건설사','브랜드등급']]
-display(a)
-b = df[df['브랜드등급'] == '프리미엄'][['시군구','아파트명','단지분류','브랜드등급']]
-display(b)
+# a = df[df['브랜드등급'] == '하이엔드'][['시군구','아파트명','단지분류','건설사','브랜드등급']]
+# display(a)
+# b = df[df['브랜드등급'] == '프리미엄'][['시군구','아파트명','단지분류','브랜드등급']]
+# display(b)
 
 
 
 
 
 #%%
+# 강남3구여부 추가
+
 # grouped = df.groupby(['계약년도','자치구'])['target'].median().reset_index()
 # sns.lineplot(data=grouped, x='계약년도', y='target',hue='자치구', palette='Set2')
 # plt.legend(loc='lower left')
@@ -285,46 +276,79 @@ display(b)
 premium_areas = ['강남구', '서초구', '송파구']
 df['강남3구여부'] = df['자치구'].isin(premium_areas).astype(int)
 
-# df[df['지역프리미엄'] == 1]
+# df[df['강남3구여부'] == 1]
+
+
+
+
 
 #%%
-# df.info()
+# 지하철 및 버스 정보 병합
+transportation_train_df = pd.read_csv("../../data/processed/transportation-features/train_transportation_features.csv")
+transportation_test_df = pd.read_csv("../../data/processed/transportation-features/test_transportation_features.csv")
+
+transportation_df = pd.concat([transportation_train_df, transportation_test_df])
+
+# # 같은 아파트명에 대해 정보가 2개 이상인 건이 있는지 확인
+# check_cols = transportation_df.columns.difference(['아파트명'])
+# agg_df = transportation_df.groupby('아파트명')[check_cols].nunique()
+# unique_check = (agg_df == 1).all(axis=1)
+# not_unique_df = unique_check[unique_check == False].reset_index()
+# print(not_unique_df)
+
+# # transportation_df에서 해당 아파트명만 필터링
+# conflict_df = transportation_df[transportation_df['아파트명'].isin(not_unique_df['아파트명'])]
+# display(conflict_df)
+
+# # conflict 예시
+# display(transfortation_df[transportation['아파트명] == 'DMC아이파크'])
+
+# 같은 아파트명인데 여러개의 고유값을 가진 아파트들에 대해서는 최빈값으로 값 통일
+unique_transportation_df = transportation_df.groupby(['아파트명']).agg(lambda x: x.mode()).reset_index()
+df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
+
 
 #%%
-final_columns = ['계약일자', '계약년월', '계약년도', '계약월',
+final_columns = [
+                # 날짜(계약일 관련 변수)
+                '계약일자', '계약년월', '계약년도', '계약월',
+
+                # 위치 변수
                 '자치구', '법정동', 
+                '강남3구여부',
+                
+                # 아파트 특성 변수
                 '전용면적',
-                '연식',                   # 건축년도 -> 연식으로 대체
                 '층',
                 '홈페이지유무',
                 '사용허가여부',
+                '연식',
                 '브랜드등급',
-                '아파트이름길이',          # 아파트명 -> 아파트이름길이
-                '강남3구여부',
-                #'전체세대수',          # '전체세대수' 또한 단지분류의 other에 해당되어 추정 불가능
-                
+                '아파트이름길이', 
+
                 # 지하철관련 변수
-                # '지하철최단거리'
-                # '반경_1km_지하철역_수'
-                # '반경_500m_지하철역_수'
-                # '반경_300m_지하철역_수'
+                '지하철최단거리',
+                '반경_1km_지하철역_수',
+                '반경_500m_지하철역_수',
+                '반경_300m_지하철역_수',
 
                 # 버스관련 변수
-                # '버스최단거리'
-                # '반경_1km_버스정류장_수'
-                # '반경_500m_버스정류장_수'
-                # '반경_300m_버스정류장_수'
+                '버스최단거리',
+                '반경_1km_버스정류장_수',
+                '반경_500m_버스정류장_수',
+                '반경_300m_버스정류장_수',
 
                 # 인구수관련 변수
                 '총인구수',
                 '성비(남/여)',
 
-                # 대출금리 변수 
+                # 대출금리 변수
                 'loanrate_1m', 'loanrate_3m', 'loanrate_6m', 'loanrate_12m',
 
                 # target, train/test 구분 변수
-                'target',
-                'isTest']
+                'target', 'isTest'
+]
+
 
 
 
@@ -340,15 +364,19 @@ train_clean.info()
 
 #%%
 # make data folder 'cleaned_data'
-data_dir = 'cleaned_data'
+data_dir = '../../cleaned_data'
 os.makedirs(data_dir, exist_ok=True)
 
 # save 'train_clean.csv' and 'test_clean.csv'
-traindata_filename = '../../data/processed/train_clean.csv'
-testdata_filename = '../../data/processed/test_clean.csv'
+traindata_filename = 'train_clean.csv'
+testdata_filename = 'test_clean.csv'
 
 traindata_path = os.path.join(data_dir, traindata_filename)
 testdata_path = os.path.join(data_dir, testdata_filename)
 
 train_clean.to_csv(traindata_path, index=False)
 test_clean.to_csv(testdata_path, index=False)
+
+
+# %%
+train_clean.info()
