@@ -25,7 +25,7 @@ df_feature_cleaned = df.copy()
 
 
 #%%
-# X,Y 좌표가 없는 행 삭제
+# 교통정보가 없는 행 삭제
 df = df.dropna(subset=[
     '지하철최단거리', '버스최단거리',
     '반경_1km_지하철역_수', '반경_1km_버스정류장_수',
@@ -33,7 +33,7 @@ df = df.dropna(subset=[
     '반경_300m_지하철역_수', '반경_300m_버스정류장_수'
 ])
 
-df.info()
+# df.info()
 
 
 
@@ -68,7 +68,7 @@ print(f"Total rows to be deleted: {len(rare_apts_df)}")
 display(rare_apts_df[['계약년도','아파트명']])
 
 df = df[~df['아파트명'].isin(rare_apts_list)]
-print(df.info())
+# print(df.info())
 
 ########################### 위 코드로 대체 ################################
 # # 2023년 이전 드물게 등장한 단지 제거 (오타, 노이즈 제거)
@@ -89,7 +89,11 @@ print(df.info())
 
 
 #%%
-# 아파트/전용면적 별 이상치거래 확인
+# 아파트+전용면적 별 이상치거래 확인
+
+# 이를 위해 아파트가 결측치인 행 먼저 삭제
+df = df[df['아파트명'].notna()].copy()
+
 ## 전용면적은 오타 방지를 위해 소숫점이하는 버리고 진행
 
 # 판단기준:
@@ -131,16 +135,90 @@ display(outlier_labeled_df[outlier_labeled_df['is_outlier_robust_target'] == Tru
 
 df = outlier_labeled_df[~outlier_labeled_df['is_outlier_robust_target']]
 
-print(df.info())
+# print(df.info())
 
 
 
 #%%
-# 필요없는 column제거 후 저장
-del_col_list = ['전용면적_floor', 'rolling_robust_z', 'is_outlier_robust_target']
+# 모델링에 필요없는 column제거 후 저장
+del_col_list = ['본번', '부번', '번지', '아파트명', 
+                '전용면적_floor', 'rolling_robust_z', 'is_outlier_robust_target',
+                'isTest']
 df = df.drop(columns=del_col_list, errors='ignore')
 
-display(df.info())
-display(df.head())
+# display(df.info())
+# display(df.head())
 
-df.to_csv('../../cleaned_data/train_row_cleaned.csv', index=False)
+df.to_csv('../../cleaned_data/train_row_cleaned.csv', index=False, encoding='utf-8')
+
+
+
+
+
+#######################################################
+
+
+
+#%% 
+# test_clean.csv에서 교통변수 관련 변수 결측치 보간
+test_df = pd.read_csv('../../cleaned_data/test_clean.csv')
+test_df.info()
+display(test_df[test_df['지하철최단거리'].isna()])
+
+
+#%%
+# 전체 데이터에서 교통변수 관련 변수가 결측치 아닌 데이터만 추출
+total_df = pd.read_csv('../../cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
+transport_cols = [
+    '지하철최단거리',
+    '반경_1km_지하철역_수',
+    '반경_500m_지하철역_수',
+    '반경_300m_지하철역_수',
+    '버스최단거리',
+    '반경_1km_버스정류장_수',
+    '반경_500m_버스정류장_수',
+    '반경_300m_버스정류장_수'
+]
+trans_nonnull_df = total_df.dropna(subset=transport_cols)
+
+#%%
+# test_df 에서 교통변수 관련변수가 결측치인 데이터의 본번, 부번, 번지들 확인
+missing_test_rows = test_df[test_df['지하철최단거리'].isna()][['본번','부번','번지']]
+display(missing_test_rows)
+
+#       본번	부번	번지
+# 0	    752.0	17.0	752-17
+# 1	    780.0	86.0	780-86
+# 2	    323.0	4.0	    323-4
+# 6	    747.0	34.0	747-34
+# 9	    432.0	904.0	432-904
+# 3454	38.0	58.0	38-58
+# 3471	976.0	15.0	976-15
+
+
+#%%
+# 결측치를 본번이 같은 다른 관측값들의 평균으로 채움
+for idx, row in missing_test_rows.iterrows():
+    di = row['본번']
+
+    case = trans_nonnull_df[trans_nonnull_df['본번'] == di][transport_cols]
+    
+    if not case.empty:
+        mean_vals = case.mean(numeric_only=True)
+        for col in transport_cols:
+            test_df.loc[idx, col] = mean_vals[col]
+
+# test_df.info()
+
+
+# %%
+# 모델링에 필요없는 column제거 후 저장
+del_col_list = ['본번', '부번', '번지', '아파트명', 
+                'isTest']
+test_df = test_df.drop(columns=del_col_list, errors='ignore')
+
+# display(test_df.info())
+# display(test_df.head())
+
+test_df.to_csv('../../cleaned_data/test_na_filled.csv', index=False, encoding='utf-8')
+
