@@ -268,9 +268,9 @@ df.loc[(df['브랜드등급'] == '기타') & df['건설사'].str.contains('|'.jo
 
 
 a = df[df['브랜드등급'] == '하이엔드'][['시군구','아파트명','단지분류','건설사','브랜드등급']]
-display(a)
+#display(a)
 b = df[df['브랜드등급'] == '프리미엄'][['시군구','아파트명','단지분류','브랜드등급']]
-display(b)
+#display(b)
 
 
 
@@ -340,12 +340,12 @@ train_clean.info()
 
 #%%
 # make data folder 'cleaned_data'
-data_dir = 'cleaned_data'
+data_dir = '../../data/processed/cleaned_data'
 os.makedirs(data_dir, exist_ok=True)
 
 # save 'train_clean.csv' and 'test_clean.csv'
-traindata_filename = '../../data/processed/train_clean.csv'
-testdata_filename = '../../data/processed/test_clean.csv'
+traindata_filename = 'train_clean.csv'
+testdata_filename = 'test_clean.csv'
 
 traindata_path = os.path.join(data_dir, traindata_filename)
 testdata_path = os.path.join(data_dir, testdata_filename)
