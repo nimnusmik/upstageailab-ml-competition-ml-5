@@ -160,7 +160,6 @@ data/raw/train.csv
 data/processed/transportation-features/train_transportation.csv
 data/processed/price-prediction-transport/train_unique_check.csv
 data/processed/cleaned_data/train_clean.csv
-
 **/train_geocoded.csv
 data/processed/geocoding-missing-coords/train_geocoded_train.csv
 **/*.pkl

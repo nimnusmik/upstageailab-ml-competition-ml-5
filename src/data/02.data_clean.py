@@ -364,7 +364,7 @@ train_clean.info()
 
 #%%
 # make data folder 'cleaned_data'
-data_dir = '../../cleaned_data'
+data_dir = '../../data/processed/cleaned_data'
 os.makedirs(data_dir, exist_ok=True)
 
 # save 'train_clean.csv' and 'test_clean.csv'
