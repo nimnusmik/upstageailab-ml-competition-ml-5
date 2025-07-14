@@ -52,6 +52,10 @@ columns = [ # 처리한 변수
         '주차대수', 'k-전체동수', 
         'k-건설사(시공사)',
         'k-난방방식', 'k-관리방식', 'k-복도유형', 'k-전체세대수', 
+        
+        # 교통편 관련 변수
+        '지하철최단거리','반경_1km_지하철역_수','반경_500m_지하철역_수','반경_300m_지하철역_수',
+        '버스최단거리','반경_1km_버스정류장_수','반경_500m_버스정류장_수','반경_300m_버스정류장_수',
 
         # target 및 train/test 구분
         'target', 'isTest']
@@ -247,7 +251,8 @@ df = pd.merge(df, loanrate_df, how = 'left', left_on = '계약년월', right_on 
 
 #%%
 # 아파트 브랜드등급 추가
-highend_aptlist = ['디에이치', '아크로', '써밋', '트리마제', '르엘', '푸르지오써밋', '위브더제니스']
+highend_aptlist = ['디에이치', '아크로', '써밋', '트리마제', '르엘', '푸르지오써밋', '위브더제니스',
+                   'PH129', '파르크한남', '나인원한남', '포제스한강', '한남더힐', '갤러리아포레', '포제스한강']
 premium_aptlist = ['삼성', '현대', '대우', '대림', 'GS', '지에스', '포스코', '롯데', 'SK', '에스케이', '한화']
 # 출처: 한국기업평판연구소 브랜드평판지수 https://brikorea.com/
 
@@ -284,10 +289,10 @@ df['강남3구여부'] = df['자치구'].isin(premium_areas).astype(int)
 
 #%%
 # 지하철 및 버스 정보 병합
-transportation_train_df = pd.read_csv("../../data/processed/transportation-features/train_transportation_features.csv")
-transportation_test_df = pd.read_csv("../../data/processed/transportation-features/test_transportation_features.csv")
+# transportation_train_df = pd.read_csv("../../data/processed/transportation-features/train_transportation_features.csv")
+# transportation_test_df = pd.read_csv("../../data/processed/transportation-features/test_transportation_features.csv")
 
-transportation_df = pd.concat([transportation_train_df, transportation_test_df])
+# transportation_df = pd.concat([transportation_train_df, transportation_test_df])
 
 # # 같은 아파트명에 대해 정보가 2개 이상인 건이 있는지 확인
 # check_cols = transportation_df.columns.difference(['아파트명'])
@@ -304,8 +309,8 @@ transportation_df = pd.concat([transportation_train_df, transportation_test_df])
 # display(transfortation_df[transportation['아파트명] == 'DMC아이파크'])
 
 # 같은 아파트명인데 여러개의 고유값을 가진 아파트들에 대해서는 최빈값으로 값 통일
-unique_transportation_df = transportation_df.groupby(['아파트명']).agg(lambda x: x.mode()).reset_index()
-df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
+# unique_transportation_df = transportation_df.groupby(['아파트명']).agg(lambda x: x.mode()).reset_index()
+# df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
 
 
 #%%
