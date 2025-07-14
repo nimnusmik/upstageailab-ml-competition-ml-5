@@ -378,45 +378,45 @@ df.info()
 
 #%%
 print("train 데이터에 대한 결측치 확인")
-display(df[df['isTest'] == 0].info())
+df[df['isTest'] == 0].info()
 
 print("test 데이터에 대한 결측치 확인")
-display(df[df['isTest'] == 1].info())
+df[df['isTest'] == 1].info()
 
 
 
 #%%
-# # 최근 1개월, 3개월, 6개월, 1년간 해당 아파트의 거래건수
-# df['계약년월'] = pd.to_datetime(df['계약년월'], format='%Y%m', errors='coerce').dt.to_period('M').dt.to_timestamp()
-# df = df.sort_values(['아파트명', '계약년월'])
+# 최근 1개월, 3개월, 6개월, 1년간 해당 아파트의 거래건수
+df['계약년월'] = pd.to_datetime(df['계약년월'], format='%Y%m', errors='coerce').dt.to_period('M').dt.to_timestamp()
+df = df.sort_values(['아파트명', '계약년월'])
 
-# tqdm.pandas()
+tqdm.pandas()
 
-# def count_past_transactions(group, months):
-#     group = group.sort_values('계약년월')
+def count_past_transactions(group, months):
+    group = group.sort_values('계약년월')
     
-#     results = {f'과거{m}개월_거래수': [] for m in months}
+    results = {f'과거{m}개월_거래수': [] for m in months}
     
-#     for idx, row in group.iterrows():
-#         for m in months:
-#             past_start = row['계약년월'] - pd.DateOffset(months=m)
-#             past_end = row['계약년월']
-#             count = group[(group['계약년월'] >= past_start) & (group['계약년월'] < past_end)].shape[0]
-#             results[f'과거{m}개월_거래수'].append(count)
+    for idx, row in group.iterrows():
+        for m in months:
+            past_start = row['계약년월'] - pd.DateOffset(months=m)
+            past_end = row['계약년월']
+            count = group[(group['계약년월'] >= past_start) & (group['계약년월'] < past_end)].shape[0]
+            results[f'과거{m}개월_거래수'].append(count)
     
-#     return pd.DataFrame(results, index=group.index)
+    return pd.DataFrame(results, index=group.index)
 
 
-# months = [1, 3, 6, 12]
-# monthly_counts_df = df.groupby('아파트명').progress_apply(count_past_transactions, months=months)
-# monthly_counts_df.reset_index(level=0, drop=True, inplace=True)
+months = [1, 3, 6, 12]
+monthly_counts_df = df.groupby('아파트명').progress_apply(count_past_transactions, months=months)
+monthly_counts_df.reset_index(level=0, drop=True, inplace=True)
 
-# df = pd.concat([df, monthly_counts_df], axis=1)
+df = pd.concat([df, monthly_counts_df], axis=1)
+
 
 
 #%%
 # 파일 저장
-#%%
 # make data folder 'cleaned_data'
 data_dir = '../../data/processed/cleaned_data'
 os.makedirs(data_dir, exist_ok=True)
@@ -468,10 +468,10 @@ final_columns = [
                 '성비(남/여)',
 
                 # 과거 거래수 변수
-                # '과거1개월_거래수',
-                # '과거3개월_거래수',
-                # '과거6개월_거래수',
-                # '과거12개월_거래수',
+                '과거1개월_거래수',
+                '과거3개월_거래수',
+                '과거6개월_거래수',
+                '과거12개월_거래수',
 
                 # 대출금리 변수
                 'loanrate_1m', 'loanrate_3m', 'loanrate_6m', 'loanrate_12m',
@@ -494,6 +494,7 @@ train_clean.info()
 
 
 
+#%%
 # save 'train_clean.csv' and 'test_clean.csv'
 traindata_filename = 'train_clean.csv'
 testdata_filename = 'test_clean.csv'
@@ -505,6 +506,3 @@ train_clean.to_csv(traindata_path, index=False, encoding='utf-8')
 test_clean.to_csv(testdata_path, index=False, encoding='utf-8')
 
 
-
-# %%
-train_clean.info()
