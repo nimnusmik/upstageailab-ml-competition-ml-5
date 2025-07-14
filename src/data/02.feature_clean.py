@@ -7,6 +7,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 import re
+from tqdm import tqdm
 
 # set kr font
 import matplotlib.font_manager
@@ -22,13 +23,32 @@ print(os.getcwd())
 
 #%%
 # import data
-train_rawdf = pd.read_csv('../../data/raw/train.csv', dtype = {16: 'str', 17: 'str', 36: 'str'})
-test_rawdf = pd.read_csv('../../data/raw/test.csv')
-bus_rawdf = pd.read_csv('../../data/raw/bus_feature.csv')
-subway_rawdf = pd.read_csv('../../data/raw/subway_feature.csv')
+
+###############################################################################################
+###################### 01.data_download.py를 진행하여 나온 파일이 아닌 ############################
+##################### 버스와 지하철 관련 정보가 결합된 파일로 변경하여 진행 ###########################
+############################################################################################### 
+# train_rawdf = pd.read_csv('../../data/raw/train.csv', dtype = {16: 'str', 17: 'str', 36: 'str'})
+# test_rawdf = pd.read_csv('../../data/raw/test.csv')
+# bus_rawdf = pd.read_csv('../../data/raw/bus_feature.csv')
+# subway_rawdf = pd.read_csv('../../data/raw/subway_feature.csv')
+train_rawdf = pd.read_csv("../../data/processed/transportation-features/train_transportation_merged.csv", dtype={16: 'str', 17: 'str'})
+test_rawdf = pd.read_csv("../../data/processed/transportation-features/test_transportation_merged.csv")
 loanrate_df = pd.read_csv('../../data/raw/loanrate.csv')
 population_df = pd.read_csv('../../data/raw/population.csv')
 
+
+#%%
+# (0715추가) 위의 test_rawdf가 원본 test와 인덱스 일치하는지 확인
+test_rawdf = pd.read_csv("../../data/processed/transportation-features/test_transportation_merged.csv")
+test_rawdf_original = pd.read_csv('../../data/raw/test.csv')
+
+cols = ['시군구', '번지', '본번', '부번', '아파트명', '계약년월', '계약일']
+
+# 모든 관측치가 동일한지 확인
+equal_rows = test_rawdf_original[cols].reset_index(drop=True).equals(test_rawdf[cols].reset_index(drop=True))
+# equal_rows
+# True
 
 
 #%%
@@ -39,6 +59,25 @@ rawdf = pd.concat([train_rawdf, test_rawdf])
 
 # print(rawdf.columns)
 
+####################### 처음부터 버스 및 지하철 관련 정보 병합되어 있어 columns 아래와 같이 수정 #########################
+# columns = [ # 처리한 변수
+#         '계약년월', '계약일', '시군구', '아파트명', '전용면적(㎡)', '층', '건축년도',    
+#         'k-단지분류(아파트,주상복합등등)', 'k-홈페이지', '사용허가여부',
+
+#         # 처리중 변수
+#         '본번', '부번', '번지', '도로명', '좌표X', '좌표Y',                                         
+#         # '해제사유발생일',                                                                                                                                    
+#         # 'k-연면적',
+         
+#         # 처리 안 된 변수 중 결측치 많은 변수
+#         '주차대수', 'k-전체동수', 
+#         'k-건설사(시공사)',
+#         'k-난방방식', 'k-관리방식', 'k-복도유형', 'k-전체세대수', 
+
+#         # target 및 train/test 구분
+#         'target', 'isTest']
+##################################################################################################################
+
 columns = [ # 처리한 변수
         '계약년월', '계약일', '시군구', '아파트명', '전용면적(㎡)', '층', '건축년도',    
         'k-단지분류(아파트,주상복합등등)', 'k-홈페이지', '사용허가여부',
@@ -47,6 +86,18 @@ columns = [ # 처리한 변수
         '본번', '부번', '번지', '도로명', '좌표X', '좌표Y',                                         
         # '해제사유발생일',                                                                                                                                    
         # 'k-연면적',
+
+        # 지하철관련 변수
+        '지하철최단거리',
+        '반경_1km_지하철역_수',
+        '반경_500m_지하철역_수',
+        '반경_300m_지하철역_수',
+
+        # 버스관련 변수
+        '버스최단거리',
+        '반경_1km_버스정류장_수',
+        '반경_500m_버스정류장_수',
+        '반경_300m_버스정류장_수',
          
         # 처리 안 된 변수 중 결측치 많은 변수
         '주차대수', 'k-전체동수', 
@@ -55,6 +106,11 @@ columns = [ # 처리한 변수
 
         # target 및 train/test 구분
         'target', 'isTest']
+
+
+
+
+
 
 df = rawdf[columns]
 
@@ -67,6 +123,9 @@ print(df.columns)
 # df.info()
 
 df_original = df.copy()
+
+
+
 
 
 #%%
@@ -104,15 +163,6 @@ df['법정동'] = pd.Series(area)
 # tmp = [i for i in df['동'].unique() if i.endswith('가')]
 # print(tmp)
 # print(df['자치구'].unique())
-
-
-
-#%%
-# 아파트명 -> 결측치는 ''으로 처리
-
-# print(df['아파트명'].nunique())
-
-df['아파트명'] = [i if type(i) == str else '' for i in df['아파트명']]
 
 
 
@@ -209,7 +259,7 @@ df['연식'] = df['연식'].clip(lower=0)
 
 #%%
 ## 아파트 이름 길이
-df['아파트이름길이'] = [len(i) for i in df['아파트명']]
+df['아파트이름길이'] = [len(i.strip()) if pd.notnull(i) else 0 for i in df['아파트명']]
 # print(df['아파트이름길이'].describe())
 
 
@@ -285,133 +335,132 @@ df['강남3구여부'] = df['자치구'].isin(premium_areas).astype(int)
 
 
 #%%
-# 지하철 및 버스 정보 병합
-transportation_train_df = pd.read_csv("../../data/processed/transportation-features/train_transportation_features.csv")
-transportation_test_df = pd.read_csv("../../data/processed/transportation-features/test_transportation_features.csv")
+##################################################################################################################
+############ 최상단의 X, Y결측치 채워서 지오코딩된 업데이트된 파일로 변경함으로써 교통정보를 따로 취합할 필요 없어짐 ############
+##################################################################################################################
 
-transportation_df = pd.concat([transportation_train_df, transportation_test_df])
-transportation_df = transportation_df[transportation_df['아파트명'].notna() & (transportation_df['아파트명'].str.strip() != '')]
+# transportation_train_df = pd.read_csv("../../data/processed/transportation-features/train_transportation_features.csv")
+# transportation_test_df = pd.read_csv("../../data/processed/transportation-features/test_transportation_features.csv")
 
-# # 같은 아파트명에 대해 정보가 2개 이상인 건이 있는지 확인
-# check_cols = transportation_df.columns.difference(['아파트명'])
-# agg_df = transportation_df.groupby('아파트명')[check_cols].nunique()
-# unique_check = (agg_df == 1).all(axis=1)
-# not_unique_df = unique_check[unique_check == False].reset_index()
-# print(not_unique_df)
+# transportation_df = pd.concat([transportation_train_df, transportation_test_df])
+# transportation_df = transportation_df[transportation_df['아파트명'].notna() & (transportation_df['아파트명'].str.strip() != '')]
 
-# # transportation_df에서 해당 아파트명만 필터링
-# conflict_df = transportation_df[transportation_df['아파트명'].isin(not_unique_df['아파트명'])]
-# display(conflict_df)
+# # # 같은 아파트명에 대해 정보가 2개 이상인 건이 있는지 확인
+# # check_cols = transportation_df.columns.difference(['아파트명'])
+# # agg_df = transportation_df.groupby('아파트명')[check_cols].nunique()
+# # unique_check = (agg_df == 1).all(axis=1)
+# # not_unique_df = unique_check[unique_check == False].reset_index()
+# # print(not_unique_df)
 
-# # conflict 예시
-# display(transfortation_df[transportation['아파트명] == 'DMC아이파크'])
+# # # transportation_df에서 해당 아파트명만 필터링
+# # conflict_df = transportation_df[transportation_df['아파트명'].isin(not_unique_df['아파트명'])]
+# # display(conflict_df)
 
-# 같은 아파트명인데 여러개의 고유값을 가진 아파트들에 대해서는 최빈값으로 값 통일
-unique_transportation_df = transportation_df.groupby(['아파트명']).agg(lambda x: x.mode().iloc[0]).reset_index()
-df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
+# # # conflict 예시
+# # display(transfortation_df[transportation['아파트명] == 'DMC아이파크'])
+
+# # 같은 아파트명인데 여러개의 고유값을 가진 아파트들에 대해서는 최빈값으로 값 통일
+# unique_transportation_df = transportation_df.groupby(['아파트명']).agg(lambda x: x.mode().iloc[0]).reset_index()
+# df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
+
+# # 교통정보가 결측값인 행들에 대해 본번과 부번을 이용하여 대체합니다.
+# # case1. 본번과 부번이 같은 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
+# # case2. 본번이 같지만 부번이 1 차이나는 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
+
+# # 가령
+# # 교통정보가 결측치인 행이 본번 123, 부번 12, 번지 12-34 를 갖고 있다면
+# # 본번 123, 부번 12인 값들이 있는 경우 (case1) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
+# # 없다면 본번 123, 부번이 10~14인 값들이 있는 경우 (case2) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
+
+# transport_cols = [
+#     '지하철최단거리',
+#     '반경_1km_지하철역_수',
+#     '반경_500m_지하철역_수',
+#     '반경_300m_지하철역_수',
+#     '버스최단거리',
+#     '반경_1km_버스정류장_수',
+#     '반경_500m_버스정류장_수',
+#     '반경_300m_버스정류장_수'
+# ]
+
+# # 교통정보가 결측값 아닌 행 추출
+# trans_nonnull_df = df.dropna(subset=transport_cols)
+
+# # 교통정보가 결측값인 행 추출
+# missing_rows = df[df[transport_cols].isna().any(axis=1)]
+# # print('교통정보가 결측값인 행들에 대한 본번, 부번, 번지:')
+# # display(missing_rows[['본번','부번','번지']])
+
+# # 결측치 채우기
+# from tqdm import tqdm
+
+# for idx, row in tqdm(missing_rows.iterrows(), total=len(missing_rows)):
+#     di1, di2, di3 = row['본번'], row['부번'], row['번지']
+    
+#     case1 = trans_nonnull_df[
+#         (trans_nonnull_df['본번'] == di1) &
+#         (trans_nonnull_df['부번'] == di2)
+#     ][transport_cols].drop_duplicates()
+#     if not case1.empty:
+#         mean_vals = case1.mean()
+
+#     else:
+#         case2 = trans_nonnull_df[
+#             (trans_nonnull_df['본번'] == di1) &
+#             (trans_nonnull_df['부번'].between(di2 - 2, di2 + 2))
+#         ][transport_cols].drop_duplicates()
+#         if not case2.empty:
+#             mean_vals = case2.mean()
+#         else:
+#             continue
+
+#     for col in transport_cols:
+#         if pd.isna(df.loc[idx, col]):
+#             df.loc[idx, col] = mean_vals[col]
 
 
-#%%
 # df.info()
 
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
 
 #%%
-# 교통정보가 결측값인 행들에 대해 본번과 부번을 이용하여 대체합니다.
-# case1. 본번과 부번이 같은 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
-# case2. 본번이 같지만 부번이 1 차이나는 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
-
-# 가령
-# 교통정보가 결측치인 행이 본번 123, 부번 12, 번지 12-34 를 갖고 있다면
-# 본번 123, 부번 12인 값들이 있는 경우 (case1) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
-# 없다면 본번 123, 부번이 10~14인 값들이 있는 경우 (case2) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
-
-transport_cols = [
-    '지하철최단거리',
-    '반경_1km_지하철역_수',
-    '반경_500m_지하철역_수',
-    '반경_300m_지하철역_수',
-    '버스최단거리',
-    '반경_1km_버스정류장_수',
-    '반경_500m_버스정류장_수',
-    '반경_300m_버스정류장_수'
-]
-
-# 교통정보가 결측값 아닌 행 추출
-trans_nonnull_df = df.dropna(subset=transport_cols)
-
-# 교통정보가 결측값인 행 추출
-missing_rows = df[df[transport_cols].isna().any(axis=1)]
-print('교통정보가 결측값인 행들에 대한 본번, 부번, 번지:')
-display(missing_rows[['본번','부번','번지']])
-
-#%%
-# 결측치 채우기
-from tqdm import tqdm
-
-for idx, row in tqdm(missing_rows.iterrows(), total=len(missing_rows)):
-    di1, di2, di3 = row['본번'], row['부번'], row['번지']
-    
-    case1 = trans_nonnull_df[
-        (trans_nonnull_df['본번'] == di1) &
-        (trans_nonnull_df['부번'] == di2)
-    ][transport_cols].drop_duplicates()
-    if not case1.empty:
-        mean_vals = case1.mean()
-
-    else:
-        case2 = trans_nonnull_df[
-            (trans_nonnull_df['본번'] == di1) &
-            (trans_nonnull_df['부번'].between(di2 - 2, di2 + 2))
-        ][transport_cols].drop_duplicates()
-        if not case2.empty:
-            mean_vals = case2.mean()
-        else:
-            continue
-
-    for col in transport_cols:
-        if pd.isna(df.loc[idx, col]):
-            df.loc[idx, col] = mean_vals[col]
-
-
-df.info()
-
-
-#%%
-print("train 데이터에 대한 결측치 확인")
+print("--- train 데이터에 대한 결측치 확인 ---")
 df[df['isTest'] == 0].info()
+print()
 
-print("test 데이터에 대한 결측치 확인")
+print("--- test 데이터에 대한 결측치 확인 ---")
 df[df['isTest'] == 1].info()
 
 
+# #%%
+# # 최근 1개월, 3개월, 6개월, 1년간 해당 아파트의 거래건수
+# df['계약년월'] = pd.to_datetime(df['계약년월'], format='%Y%m', errors='coerce').dt.to_period('M').dt.to_timestamp()
+# df = df.sort_values(['아파트명', '계약년월'])
 
-#%%
-# 최근 1개월, 3개월, 6개월, 1년간 해당 아파트의 거래건수
-df['계약년월'] = pd.to_datetime(df['계약년월'], format='%Y%m', errors='coerce').dt.to_period('M').dt.to_timestamp()
-df = df.sort_values(['아파트명', '계약년월'])
+# tqdm.pandas()
 
-tqdm.pandas()
-
-def count_past_transactions(group, months):
-    group = group.sort_values('계약년월')
+# def count_past_transactions(group, months):
+#     group = group.sort_values('계약년월')
     
-    results = {f'과거{m}개월_거래수': [] for m in months}
+#     results = {f'과거{m}개월_거래수': [] for m in months}
     
-    for idx, row in group.iterrows():
-        for m in months:
-            past_start = row['계약년월'] - pd.DateOffset(months=m)
-            past_end = row['계약년월']
-            count = group[(group['계약년월'] >= past_start) & (group['계약년월'] < past_end)].shape[0]
-            results[f'과거{m}개월_거래수'].append(count)
+#     for idx, row in group.iterrows():
+#         for m in months:
+#             past_start = row['계약년월'] - pd.DateOffset(months=m)
+#             past_end = row['계약년월']
+#             count = group[(group['계약년월'] >= past_start) & (group['계약년월'] < past_end)].shape[0]
+#             results[f'과거{m}개월_거래수'].append(count)
     
-    return pd.DataFrame(results, index=group.index)
+#     return pd.DataFrame(results, index=group.index)
 
 
-months = [1, 3, 6, 12]
-monthly_counts_df = df.groupby('아파트명').progress_apply(count_past_transactions, months=months)
-monthly_counts_df.reset_index(level=0, drop=True, inplace=True)
+# months = [1, 3, 6, 12]
+# monthly_counts_df = df.groupby('아파트명').progress_apply(count_past_transactions, months=months)
+# monthly_counts_df.reset_index(level=0, drop=True, inplace=True)
 
-df = pd.concat([df, monthly_counts_df], axis=1)
+# df = pd.concat([df, monthly_counts_df], axis=1)
 
 
 
@@ -427,9 +476,9 @@ totaldata_path = os.path.join(data_dir, totaldata_filename)
 df.to_csv(totaldata_path, index=False, encoding='utf-8')
 
 
-
+# dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'}
 #%%
-df = pd.read_csv('../../data/processed/cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
+df = pd.read_csv('../../data/processed/cleaned_data/total_clean.csv')
 df.info()
 
 final_columns = [
@@ -467,11 +516,11 @@ final_columns = [
                 '총인구수',
                 '성비(남/여)',
 
-                # 과거 거래수 변수
-                '과거1개월_거래수',
-                '과거3개월_거래수',
-                '과거6개월_거래수',
-                '과거12개월_거래수',
+                # # 과거 거래수 변수
+                # '과거1개월_거래수',
+                # '과거3개월_거래수',
+                # '과거6개월_거래수',
+                # '과거12개월_거래수',
 
                 # 대출금리 변수
                 'loanrate_1m', 'loanrate_3m', 'loanrate_6m', 'loanrate_12m',
