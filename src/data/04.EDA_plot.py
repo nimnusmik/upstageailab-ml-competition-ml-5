@@ -21,7 +21,7 @@ for font in krfont:
 mpl.rcParams['axes.unicode_minus'] = False
 
 
-df = pd.read_csv('../../cleaned_data/train_row_cleaned.csv')
+df = pd.read_csv('../../data/processed/cleaned_data/train_row_cleaned.csv')
 
 df['계약일자'] = pd.to_datetime(df['계약일자'])
 df['계약년월'] = pd.to_datetime(df['계약년월'])

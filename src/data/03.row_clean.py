@@ -18,7 +18,7 @@ for font in krfont:
         mpl.rc('font', family=font)
 
 
-df = pd.read_csv('../../cleaned_data/train_clean.csv')
+df = pd.read_csv('../../data/processed/cleaned_data/train_clean.csv')
 
 print(df.info())
 df_feature_cleaned = df.copy()
@@ -149,8 +149,7 @@ df = df.drop(columns=del_col_list, errors='ignore')
 # display(df.info())
 # display(df.head())
 
-df.to_csv('../../cleaned_data/train_row_cleaned.csv', index=False, encoding='utf-8')
-
+df.to_csv('../../data/processed/cleaned_data/train_row_cleaned.csv', index=False, encoding='utf-8')
 
 
 
@@ -161,14 +160,15 @@ df.to_csv('../../cleaned_data/train_row_cleaned.csv', index=False, encoding='utf
 
 #%% 
 # test_clean.csv에서 교통변수 관련 변수 결측치 보간
-test_df = pd.read_csv('../../cleaned_data/test_clean.csv')
+test_df = pd.read_csv('../../data/processed/cleaned_data/test_clean.csv')
+
 test_df.info()
 display(test_df[test_df['지하철최단거리'].isna()])
 
 
 #%%
 # 전체 데이터에서 교통변수 관련 변수가 결측치 아닌 데이터만 추출
-total_df = pd.read_csv('../../cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
+total_df = pd.read_csv('../../data/processed/cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
 transport_cols = [
     '지하철최단거리',
     '반경_1km_지하철역_수',
@@ -220,5 +220,5 @@ test_df = test_df.drop(columns=del_col_list, errors='ignore')
 # display(test_df.info())
 # display(test_df.head())
 
-test_df.to_csv('../../cleaned_data/test_na_filled.csv', index=False, encoding='utf-8')
+test_df.to_csv('../../data/processed/cleaned_data/test_na_filled.csv', index=False, encoding='utf-8')
 

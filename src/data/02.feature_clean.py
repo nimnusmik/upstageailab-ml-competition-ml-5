@@ -44,7 +44,7 @@ columns = [ # 처리한 변수
         'k-단지분류(아파트,주상복합등등)', 'k-홈페이지', '사용허가여부',
 
         # 처리중 변수
-        '도로명', '좌표X', '좌표Y',                                         
+        '본번', '부번', '번지', '도로명', '좌표X', '좌표Y',                                         
         # '해제사유발생일',                                                                                                                                    
         # 'k-연면적',
          
@@ -52,10 +52,6 @@ columns = [ # 처리한 변수
         '주차대수', 'k-전체동수', 
         'k-건설사(시공사)',
         'k-난방방식', 'k-관리방식', 'k-복도유형', 'k-전체세대수', 
-        
-        # 교통편 관련 변수
-        '지하철최단거리','반경_1km_지하철역_수','반경_500m_지하철역_수','반경_300m_지하철역_수',
-        '버스최단거리','반경_1km_버스정류장_수','반경_500m_버스정류장_수','반경_300m_버스정류장_수',
 
         # target 및 train/test 구분
         'target', 'isTest']
@@ -67,7 +63,7 @@ df.columns = [col[2:] if col.startswith('k-') else col for col in df.columns]
 df = df.rename(columns = {'전용면적(㎡)' : '전용면적',
                           '건설사(시공사)' : '건설사',
                           '단지분류(아파트,주상복합등등)' : '단지분류'})
-# print(df.columns)
+print(df.columns)
 # df.info()
 
 df_original = df.copy()
@@ -251,14 +247,15 @@ df = pd.merge(df, loanrate_df, how = 'left', left_on = '계약년월', right_on 
 
 #%%
 # 아파트 브랜드등급 추가
-highend_aptlist = ['디에이치', '아크로', '써밋', '트리마제', '르엘', '푸르지오써밋', '위브더제니스',
+highend_aptlist = ['디에이치', '아크로', '써밋', '트리마제', '르엘', '푸르지오써밋', '위브더제니스', 
                    'PH129', '파르크한남', '나인원한남', '포제스한강', '한남더힐', '갤러리아포레', '포제스한강']
-premium_aptlist = ['삼성', '현대', '대우', '대림', 'GS', '지에스', '포스코', '롯데', 'SK', '에스케이', '한화']
+premium_constlist = ['삼성', '현대', '대우', '대림', 'GS', '지에스', '포스코', '롯데', 'SK', '에스케이', '한화']
 # 출처: 한국기업평판연구소 브랜드평판지수 https://brikorea.com/
+#      https://blog.naver.com/hocho0820/223354805570
 
 df['브랜드등급'] = '기타'
 df.loc[df['아파트명'].str.contains('|'.join(highend_aptlist), case=False, na=False), '브랜드등급'] = '하이엔드'
-df.loc[(df['브랜드등급'] == '기타') & df['건설사'].str.contains('|'.join(premium_aptlist), case=False, na=False), '브랜드등급'] = '프리미엄'
+df.loc[(df['브랜드등급'] == '기타') & df['건설사'].str.contains('|'.join(premium_constlist), case=False, na=False), '브랜드등급'] = '프리미엄'
 
 
 # a = df[df['브랜드등급'] == '하이엔드'][['시군구','아파트명','단지분류','건설사','브랜드등급']]
@@ -289,10 +286,11 @@ df['강남3구여부'] = df['자치구'].isin(premium_areas).astype(int)
 
 #%%
 # 지하철 및 버스 정보 병합
-# transportation_train_df = pd.read_csv("../../data/processed/transportation-features/train_transportation_features.csv")
-# transportation_test_df = pd.read_csv("../../data/processed/transportation-features/test_transportation_features.csv")
+transportation_train_df = pd.read_csv("../../data/processed/transportation-features/train_transportation_features.csv")
+transportation_test_df = pd.read_csv("../../data/processed/transportation-features/test_transportation_features.csv")
 
-# transportation_df = pd.concat([transportation_train_df, transportation_test_df])
+transportation_df = pd.concat([transportation_train_df, transportation_test_df])
+transportation_df = transportation_df[transportation_df['아파트명'].notna() & (transportation_df['아파트명'].str.strip() != '')]
 
 # # 같은 아파트명에 대해 정보가 2개 이상인 건이 있는지 확인
 # check_cols = transportation_df.columns.difference(['아파트명'])
@@ -309,20 +307,142 @@ df['강남3구여부'] = df['자치구'].isin(premium_areas).astype(int)
 # display(transfortation_df[transportation['아파트명] == 'DMC아이파크'])
 
 # 같은 아파트명인데 여러개의 고유값을 가진 아파트들에 대해서는 최빈값으로 값 통일
-# unique_transportation_df = transportation_df.groupby(['아파트명']).agg(lambda x: x.mode()).reset_index()
-# df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
+unique_transportation_df = transportation_df.groupby(['아파트명']).agg(lambda x: x.mode().iloc[0]).reset_index()
+df = df.merge(unique_transportation_df, how='left', on=('아파트명'))
 
 
 #%%
+# df.info()
+
+
+#%%
+# 교통정보가 결측값인 행들에 대해 본번과 부번을 이용하여 대체합니다.
+# case1. 본번과 부번이 같은 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
+# case2. 본번이 같지만 부번이 1 차이나는 관측값들이 있다면 해당 관측값들의 unique한 교통정보 column값들의 평균치로 대체합니다.
+
+# 가령
+# 교통정보가 결측치인 행이 본번 123, 부번 12, 번지 12-34 를 갖고 있다면
+# 본번 123, 부번 12인 값들이 있는 경우 (case1) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
+# 없다면 본번 123, 부번이 10~14인 값들이 있는 경우 (case2) 해당 관측치들이 갖는 고유한 교통정보 값들의 평균을 이용
+
+transport_cols = [
+    '지하철최단거리',
+    '반경_1km_지하철역_수',
+    '반경_500m_지하철역_수',
+    '반경_300m_지하철역_수',
+    '버스최단거리',
+    '반경_1km_버스정류장_수',
+    '반경_500m_버스정류장_수',
+    '반경_300m_버스정류장_수'
+]
+
+# 교통정보가 결측값 아닌 행 추출
+trans_nonnull_df = df.dropna(subset=transport_cols)
+
+# 교통정보가 결측값인 행 추출
+missing_rows = df[df[transport_cols].isna().any(axis=1)]
+print('교통정보가 결측값인 행들에 대한 본번, 부번, 번지:')
+display(missing_rows[['본번','부번','번지']])
+
+#%%
+# 결측치 채우기
+from tqdm import tqdm
+
+for idx, row in tqdm(missing_rows.iterrows(), total=len(missing_rows)):
+    di1, di2, di3 = row['본번'], row['부번'], row['번지']
+    
+    case1 = trans_nonnull_df[
+        (trans_nonnull_df['본번'] == di1) &
+        (trans_nonnull_df['부번'] == di2)
+    ][transport_cols].drop_duplicates()
+    if not case1.empty:
+        mean_vals = case1.mean()
+
+    else:
+        case2 = trans_nonnull_df[
+            (trans_nonnull_df['본번'] == di1) &
+            (trans_nonnull_df['부번'].between(di2 - 2, di2 + 2))
+        ][transport_cols].drop_duplicates()
+        if not case2.empty:
+            mean_vals = case2.mean()
+        else:
+            continue
+
+    for col in transport_cols:
+        if pd.isna(df.loc[idx, col]):
+            df.loc[idx, col] = mean_vals[col]
+
+
+df.info()
+
+
+#%%
+print("train 데이터에 대한 결측치 확인")
+display(df[df['isTest'] == 0].info())
+
+print("test 데이터에 대한 결측치 확인")
+display(df[df['isTest'] == 1].info())
+
+
+
+#%%
+# # 최근 1개월, 3개월, 6개월, 1년간 해당 아파트의 거래건수
+# df['계약년월'] = pd.to_datetime(df['계약년월'], format='%Y%m', errors='coerce').dt.to_period('M').dt.to_timestamp()
+# df = df.sort_values(['아파트명', '계약년월'])
+
+# tqdm.pandas()
+
+# def count_past_transactions(group, months):
+#     group = group.sort_values('계약년월')
+    
+#     results = {f'과거{m}개월_거래수': [] for m in months}
+    
+#     for idx, row in group.iterrows():
+#         for m in months:
+#             past_start = row['계약년월'] - pd.DateOffset(months=m)
+#             past_end = row['계약년월']
+#             count = group[(group['계약년월'] >= past_start) & (group['계약년월'] < past_end)].shape[0]
+#             results[f'과거{m}개월_거래수'].append(count)
+    
+#     return pd.DataFrame(results, index=group.index)
+
+
+# months = [1, 3, 6, 12]
+# monthly_counts_df = df.groupby('아파트명').progress_apply(count_past_transactions, months=months)
+# monthly_counts_df.reset_index(level=0, drop=True, inplace=True)
+
+# df = pd.concat([df, monthly_counts_df], axis=1)
+
+
+#%%
+# 파일 저장
+#%%
+# make data folder 'cleaned_data'
+data_dir = '../../data/processed/cleaned_data'
+os.makedirs(data_dir, exist_ok=True)
+
+totaldata_filename = 'total_clean.csv'
+totaldata_path = os.path.join(data_dir, totaldata_filename)
+
+df.to_csv(totaldata_path, index=False, encoding='utf-8')
+
+
+
+#%%
+df = pd.read_csv('../../data/processed/cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
+df.info()
+
 final_columns = [
                 # 날짜(계약일 관련 변수)
                 '계약일자', '계약년월', '계약년도', '계약월',
 
                 # 위치 변수
                 '자치구', '법정동', 
+                '본번', '부번', '번지', '도로명',     # 모델링에 쓰일 변수 아님. 03.row_clean.py에서 결측치 보간에 이용할 변수
                 '강남3구여부',
                 
                 # 아파트 특성 변수
+                '아파트명',                         # 모델링에 쓰일 변수 아님. 03.row_clean.py에서 결측치 제거에 이용할 변수
                 '전용면적',
                 '층',
                 '홈페이지유무',
@@ -347,6 +467,12 @@ final_columns = [
                 '총인구수',
                 '성비(남/여)',
 
+                # 과거 거래수 변수
+                # '과거1개월_거래수',
+                # '과거3개월_거래수',
+                # '과거6개월_거래수',
+                # '과거12개월_거래수',
+
                 # 대출금리 변수
                 'loanrate_1m', 'loanrate_3m', 'loanrate_6m', 'loanrate_12m',
 
@@ -367,10 +493,6 @@ test_clean = cleandf[cleandf['isTest'] == 1]
 train_clean.info()
 
 
-#%%
-# make data folder 'cleaned_data'
-data_dir = '../../data/processed/cleaned_data'
-os.makedirs(data_dir, exist_ok=True)
 
 # save 'train_clean.csv' and 'test_clean.csv'
 traindata_filename = 'train_clean.csv'
@@ -379,8 +501,9 @@ testdata_filename = 'test_clean.csv'
 traindata_path = os.path.join(data_dir, traindata_filename)
 testdata_path = os.path.join(data_dir, testdata_filename)
 
-train_clean.to_csv(traindata_path, index=False)
-test_clean.to_csv(testdata_path, index=False)
+train_clean.to_csv(traindata_path, index=False, encoding='utf-8')
+test_clean.to_csv(testdata_path, index=False, encoding='utf-8')
+
 
 
 # %%
