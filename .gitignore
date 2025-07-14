@@ -163,7 +163,6 @@ data/processed/transportation-features/train_transportation.csv
 data/processed/price-prediction/train_unique_check.csv
 data/processed/price-prediction/train_final.csv
 data/processed/cleaned_data/train_clean.csv
-data/processed/cleaned_data/test_clean.csv
 data/processed/transportation-features/train_transportation_features.csv
 **/train_geocoded.csv
 data/processed/geocoding-missing-coords/train_geocoded_train.csv
