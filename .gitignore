@@ -157,12 +157,12 @@ nosetests.xml # Test results
 data/raw/basefile.tar
 .vscode
 data/raw/train.csv
+data/processed/geocoding/train_geocoded_checkpoint.csv
 data/processed/transportation-features/train_transportation.csv
 data/processed/price-prediction/train_unique_check.csv
 data/processed/price-prediction/train_final.csv
 data/processed/cleaned_data/train_clean.csv
 **/train_geocoded.csv
-data/processed/geocoding-missing-coords/train_geocoded_train.csv
 
 
 # 제외 되면 안되는 필요한 파일 예외처리
