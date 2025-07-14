@@ -141,7 +141,7 @@ df = outlier_labeled_df[~outlier_labeled_df['is_outlier_robust_target']]
 
 #%%
 # 모델링에 필요없는 column제거 후 저장
-del_col_list = ['본번', '부번', '번지', '아파트명', 
+del_col_list = ['본번', '부번', '번지', '아파트명', '도로명',
                 '전용면적_floor', 'rolling_robust_z', 'is_outlier_robust_target',
                 'isTest']
 df = df.drop(columns=del_col_list, errors='ignore')
@@ -213,7 +213,7 @@ for idx, row in missing_test_rows.iterrows():
 
 # %%
 # 모델링에 필요없는 column제거 후 저장
-del_col_list = ['본번', '부번', '번지', '아파트명', 
+del_col_list = ['본번', '부번', '번지', '아파트명', '도로명',
                 'isTest']
 test_df = test_df.drop(columns=del_col_list, errors='ignore')
 
