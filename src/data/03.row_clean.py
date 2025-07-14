@@ -33,7 +33,7 @@ df = df.dropna(subset=[
     '반경_300m_지하철역_수', '반경_300m_버스정류장_수'
 ])
 
-# df.info()
+df.info()
 
 
 
@@ -154,11 +154,11 @@ df.to_csv('../../data/processed/cleaned_data/train_row_cleaned.csv', index=False
 
 
 
-#######################################################
+#%%
+##########################################################################
+###### 이하 부분은 버스 및 지하철 변수 결측치 채운 파일을 이용함으로써 해결됨 ######
+##########################################################################
 
-
-
-#%% 
 # test_clean.csv에서 교통변수 관련 변수 결측치 보간
 test_df = pd.read_csv('../../data/processed/cleaned_data/test_clean.csv')
 
@@ -166,59 +166,59 @@ test_df.info()
 display(test_df[test_df['지하철최단거리'].isna()])
 
 
-#%%
-# 전체 데이터에서 교통변수 관련 변수가 결측치 아닌 데이터만 추출
-total_df = pd.read_csv('../../data/processed/cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
-transport_cols = [
-    '지하철최단거리',
-    '반경_1km_지하철역_수',
-    '반경_500m_지하철역_수',
-    '반경_300m_지하철역_수',
-    '버스최단거리',
-    '반경_1km_버스정류장_수',
-    '반경_500m_버스정류장_수',
-    '반경_300m_버스정류장_수'
-]
-trans_nonnull_df = total_df.dropna(subset=transport_cols)
+# #%%
+# # 전체 데이터에서 교통변수 관련 변수가 결측치 아닌 데이터만 추출
+# total_df = pd.read_csv('../../data/processed/cleaned_data/total_clean.csv', dtype = {8: 'str',18: 'str',19: 'str',20: 'str',21: 'str'})
+# transport_cols = [
+#     '지하철최단거리',
+#     '반경_1km_지하철역_수',
+#     '반경_500m_지하철역_수',
+#     '반경_300m_지하철역_수',
+#     '버스최단거리',
+#     '반경_1km_버스정류장_수',
+#     '반경_500m_버스정류장_수',
+#     '반경_300m_버스정류장_수'
+# ]
+# trans_nonnull_df = total_df.dropna(subset=transport_cols)
 
-#%%
-# test_df 에서 교통변수 관련변수가 결측치인 데이터의 본번, 부번, 번지들 확인
-missing_test_rows = test_df[test_df['지하철최단거리'].isna()][['본번','부번','번지']]
-display(missing_test_rows)
+# #%%
+# # test_df 에서 교통변수 관련변수가 결측치인 데이터의 본번, 부번, 번지들 확인
+# missing_test_rows = test_df[test_df['지하철최단거리'].isna()][['본번','부번','번지']]
+# display(missing_test_rows)
 
-#       본번	부번	번지
-# 0	    752.0	17.0	752-17
-# 1	    780.0	86.0	780-86
-# 2	    323.0	4.0	    323-4
-# 6	    747.0	34.0	747-34
-# 9	    432.0	904.0	432-904
-# 3454	38.0	58.0	38-58
-# 3471	976.0	15.0	976-15
+# #       본번	부번	번지
+# # 0	    752.0	17.0	752-17
+# # 1	    780.0	86.0	780-86
+# # 2	    323.0	4.0	    323-4
+# # 6	    747.0	34.0	747-34
+# # 9	    432.0	904.0	432-904
+# # 3454	38.0	58.0	38-58
+# # 3471	976.0	15.0	976-15
 
 
-#%%
-# 결측치를 본번이 같은 다른 관측값들의 평균으로 채움
-for idx, row in missing_test_rows.iterrows():
-    di = row['본번']
+# #%%
+# # 결측치를 본번이 같은 다른 관측값들의 평균으로 채움
+# for idx, row in missing_test_rows.iterrows():
+#     di = row['본번']
 
-    case = trans_nonnull_df[trans_nonnull_df['본번'] == di][transport_cols]
+#     case = trans_nonnull_df[trans_nonnull_df['본번'] == di][transport_cols]
     
-    if not case.empty:
-        mean_vals = case.mean(numeric_only=True)
-        for col in transport_cols:
-            test_df.loc[idx, col] = mean_vals[col]
-
+#     if not case.empty:
+#         mean_vals = case.mean(numeric_only=True)
+#         for col in transport_cols:
+#             test_df.loc[idx, col] = mean_vals[col]
+# #%%
 # test_df.info()
 
 
-# %%
-# 모델링에 필요없는 column제거 후 저장
-del_col_list = ['본번', '부번', '번지', '아파트명', '도로명',
-                'isTest']
-test_df = test_df.drop(columns=del_col_list, errors='ignore')
+# # %%
+# # 모델링에 필요없는 column제거 후 저장
+# del_col_list = ['본번', '부번', '번지', '아파트명', '도로명',
+#                 'isTest']
+# test_df = test_df.drop(columns=del_col_list, errors='ignore')
 
-# display(test_df.info())
-# display(test_df.head())
+# # display(test_df.info())
+# # display(test_df.head())
 
-test_df.to_csv('../../data/processed/cleaned_data/test_na_filled.csv', index=False, encoding='utf-8')
+# test_df.to_csv('../../data/processed/cleaned_data/test_na_filled.csv', index=False, encoding='utf-8')
 
