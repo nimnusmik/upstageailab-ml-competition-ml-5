@@ -4,7 +4,6 @@
 
 # import package needed
 # %pip install -r requirements.txt
-
 #%%
 # import package needed
 import os
@@ -18,6 +17,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 import missingno as msno
+from IPython.display import display
 
 # set kr font
 import matplotlib.font_manager
@@ -132,3 +132,5 @@ print(subway_rawdf.head(), "\n")
 
 print(loanrate_df.head(), "\n")
 print(population_df.head(), "\n")
+
+# %%

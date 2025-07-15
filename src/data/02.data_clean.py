@@ -30,7 +30,6 @@ loanrate_df = pd.read_csv('../../data/raw/loanrate.csv')
 population_df = pd.read_csv('../../data/raw/population.csv')
 
 
-
 #%%
 # 사용할 column 선택
 train_rawdf['isTest'] = 0
@@ -385,3 +384,4 @@ test_clean.to_csv(testdata_path, index=False)
 
 # %%
 train_clean.info()
+# %%
