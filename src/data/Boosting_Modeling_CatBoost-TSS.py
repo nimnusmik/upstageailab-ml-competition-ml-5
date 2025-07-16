@@ -113,24 +113,13 @@ tscv = TimeSeriesSplit(n_splits=5, test_size=10000, gap=0, max_train_size=None)
 
 
 #%%
-# Feature 수정방향 생각해보기
-
-display(df['자치구'].nunique()), display(test_df['자치구'].unique())            # type: ignore # train에 자치구 25개 / test에 자치구 3개밖에 없음
-display(df['법정동'].nunique()), display(test_df['법정동'].unique())            # type: ignore # train에 법정동 334개 / test에 법정동 14개밖에 없음
-display(df['브랜드등급'].nunique()), display(test_df['브랜드등급'].unique())
-df.info(), test_df.info()
-
-
-
-#%%
-X_col = [ 
-    # '법정동',
+X_col = [  '자치구', '법정동',    # CatBoost에서 사용
     '계약년월idx', '강남3구여부', '전용면적', '층',
     # '홈페이지유무', '사용허가여부',                     # LightGBM결과 feature importance가 낮은 열 삭제
     '연식', '브랜드등급', '아파트이름길이', 
     '반경_지하철역_가중합', '지하철최단거리',
     '반경_버스정류장_가중합', '버스최단거리',
-    '총인구수', '좌표X', '좌표Y'
+    '인구비중', '좌표X', '좌표Y'
     # '성비(남/여)', 
     # 'loanrate_12m'
 ]
@@ -154,20 +143,43 @@ X_train, X_test, Y_train, Y_test = datasplit_ts(df, y_col, test_size=0.01)
 # transform() : 이미 계산된 최소/최대 기준으로 값을 변환함
 # 절대 test 데이터로 fit하면 안 됨 (그건 미래 정보로 과거 학습하는 것과 같음 (데이터 누수))
 
-# 1. 먼저 train 기준으로 스케일러 fit
+# CatBoost에서는 자치구를 범주형으로 자동처리하므로 자치구제외하고 스케일링
+cat_features = ['자치구', '법정동']
+
+numerical_cols = [col for col in X_col if col not in cat_features]
+
 scaler = preprocessing.MinMaxScaler()
-scaler.fit(X_train)  # train 데이터로만 최소/최대 계산
+scaler.fit(X_train[numerical_cols])
 
-# 2. 나머지는 transform만 적용
-X_train_scaled = scaler.transform(X_train)
-X_test_scaled  = scaler.transform(X_test)
-test_df_scaled = scaler.transform(test_df[X_col])  # 원래 test df도 transform만 적용
+X_train_scaled = scaler.transform(X_train[numerical_cols])
+X_test_scaled  = scaler.transform(X_test[numerical_cols])
+test_df_scaled = scaler.transform(test_df[numerical_cols])
+
+# 스케일된 수치형 + 자치구 컬럼
+X_train_scaled = pd.DataFrame(X_train_scaled, columns=numerical_cols, index=X_train.index)
+X_test_scaled  = pd.DataFrame(X_test_scaled, columns=numerical_cols, index=X_test.index)
+test_df_scaled = pd.DataFrame(test_df_scaled, columns=numerical_cols, index=test_df.index)
+
+X_train_scaled[cat_features] = X_train[cat_features].values
+X_test_scaled[cat_features]  = X_test[cat_features].values
+test_df_scaled[cat_features] = test_df[cat_features].values
 
 
-test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index)
 
 
 
+# # 1. 먼저 train 기준으로 스케일러 fit
+# scaler = preprocessing.MinMaxScaler()
+
+# scaler.fit(X_train)  # train 데이터로만 최소/최대 계산
+
+# # 2. 나머지는 transform만 적용
+# X_train_scaled = scaler.transform(X_train)
+# X_test_scaled  = scaler.transform(X_test)
+# test_df_scaled = scaler.transform(test_df[X_col])  # 원래 test df도 transform만 적용
+
+
+# test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index)
 
 
 
@@ -175,7 +187,7 @@ test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index
 ################################
 #  CatBoost with CV
 ################################
-model_cb = CatBoostRegressor(verbose=1, random_state=123)
+model_cb = CatBoostRegressor(verbose=500, random_state=123) 
 
 # # 코드 테스트용
 # params = {
@@ -189,17 +201,28 @@ model_cb = CatBoostRegressor(verbose=1, random_state=123)
 
 params = {
     'n_estimators': [1000],
-    'learning_rate': [0.01, 0.05, 0.1],
+    'learning_rate': [0.1],
     'max_depth': [4, 6, 8],
-    'l2_leaf_reg': [1, 3, 5],
-    'subsample': [0.7, 1.0],
-    'colsample_bylevel': [0.7, 1.0]
+    'l2_leaf_reg': [3, 5],
+    'subsample': [1.0],
+    'colsample_bylevel': [1.0]
 }  
+
+# best params =
+
+
+
 
 model_cb_cv = GridSearchCV(estimator=model_cb, param_grid=params, 
                            cv=tscv, scoring='neg_root_mean_squared_error',    
                            n_jobs=-1, verbose=2)   
-model_cb_cv.fit(X_train_scaled, Y_train)
+# model_cb_cv.fit(X_train_scaled, Y_train, **{'cat_features': cat_features})
+model_cb_cv.fit(
+    X_train_scaled, Y_train, 
+    cat_features=cat_features,
+    early_stopping_rounds=20
+)
+
 print("CatBoost 최적 하이퍼 파라미터: ", model_cb_cv.best_params_)
 
 
@@ -208,23 +231,28 @@ print("CatBoost 최적 하이퍼 파라미터: ", model_cb_cv.best_params_)
 for train_idx, valid_idx in tscv.split(X_train_scaled):
     pass  # 마지막 split 사용
 
-X_train_final = X_train_scaled[train_idx]
+X_train_final = X_train_scaled.iloc[train_idx]
 Y_train_final = Y_train.iloc[train_idx]
-X_valid_final = X_train_scaled[valid_idx]
+X_valid_final = X_train_scaled.iloc[valid_idx]
 Y_valid_final = Y_train.iloc[valid_idx]
 
 model_cb_cv_final = CatBoostRegressor(
     **model_cb_cv.best_params_,
     random_state=123,
-    verbose=2,
+    verbose=100,
     early_stopping_rounds=20
 )
 
 model_cb_cv_final.fit(
     X_train_final, Y_train_final,
-    eval_set=(X_valid_final, Y_valid_final)
+    eval_set=(X_valid_final, Y_valid_final),
+    cat_features=cat_features
 )
 
+#%%
+model_cb_cv_final.get_feature_importance(prettified=True)
+
+#%%
 Y_trpred = pd.DataFrame(model_cb_cv_final.predict(X_train_final), 
                         index=Y_train_final.index, columns=['Pred'])
 Y_valpred = pd.DataFrame(model_cb_cv_final.predict(X_valid_final), 
@@ -270,6 +298,7 @@ Resid_val = Y_valid_final.squeeze() - Y_valpred.squeeze()
 Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
 
 sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
@@ -279,6 +308,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_valpred.squeeze(), y=Resid_val)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Validation Residual Plot (log)")
@@ -288,6 +318,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
@@ -300,6 +331,7 @@ Resid_val_true = Y_valid_final_true.squeeze() - Y_valpred_true.squeeze()
 Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
 
 sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -309,6 +341,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_valpred_true.squeeze(), y=Resid_val_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Validation Residual Plot")
@@ -318,6 +351,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
@@ -349,3 +383,5 @@ submission_path = os.path.join(prediction_save_dir, 'CB_prediction.csv')
 CB_CV_prediction.to_csv(submission_path, index=False)
 
 
+
+# %%

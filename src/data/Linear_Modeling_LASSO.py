@@ -30,7 +30,7 @@ mpl.rcParams['axes.unicode_minus'] = False
 import statsmodels.api as sm
 from scipy import stats
 from sklearn.linear_model import LinearRegression, LassoCV
-
+from sklearn.model_selection import TimeSeriesSplit
 
 # for regression
 from reg_custom import *
@@ -65,7 +65,8 @@ os.makedirs(model_save_dir, exist_ok=True)
 prediction_save_dir = '../../data/processed/submissions'
 os.makedirs(prediction_save_dir, exist_ok=True)
 
-
+# LASSO에 TimeSeriesSplit적용
+tscv = TimeSeriesSplit(n_splits=5, test_size=10000, gap=0, max_train_size=None) 
 
 
 #%%
@@ -154,9 +155,9 @@ df['브랜드등급_labeled'] = le.fit_transform(df['브랜드등급'])
 # df['계약날짜idx'] = (df['계약일자dt'] - pd.to_datetime("2007-01-01")).dt.days 
 df['계약년월idx'] = ((df['계약년도'] - 2007) * 12 + df['계약월']).astype(int)
 X_col = ['계약년월idx', '전용면적', '층', 
-          '강남3구여부', '홈페이지유무', '사용허가여부', '좌표X', '좌표Y'
+          '강남3구여부', '홈페이지유무', '사용허가여부', '좌표X', '좌표Y',
           '연식', '아파트이름길이', '지하철최단거리', '버스최단거리', 
-          '총인구수', '성비(남/여)',
+          '총인구수', '인구비중', '성비(남/여)',
           'loanrate_12m',
           '반경_1km_버스정류장_수',
           '반경_1km_지하철역_수',
@@ -168,7 +169,7 @@ lasso_df = df[X_col + y_col]
 
 #%%
 # 데이터분리
-X_train, X_test, Y_train, Y_test = datasplit(lasso_df, y_col)
+X_train, X_test, Y_train, Y_test = datasplit_ts(lasso_df, y_col)
 
 scaler = preprocessing.MinMaxScaler()
 scaler_fit = scaler.fit(X_train)
@@ -192,7 +193,7 @@ X_train_fe = sm.add_constant(X_train_fe)
 X_test_fe = sm.add_constant(X_test_fe)
 
 # LASSO with cross-validation to choose best alpha
-lasso_model = LassoCV(cv=10, random_state=123, alphas=np.logspace(-4, 1, 50), max_iter=10000)
+lasso_model = LassoCV(cv=tscv, random_state=123, alphas=np.logspace(-4, 1, 50), max_iter=10000)
 lasso_model.fit(X_train_fe, Y_train)
 
 print("Best alpha:", lasso_model.alpha_)
@@ -217,30 +218,9 @@ display(coef_df)
 Y_trpred = lasso_model.predict(X_train_fe)
 Y_tepred = lasso_model.predict(X_test_fe)
 
+print(Y_train.shape, Y_trpred.shape)
 
-# train잔차 그래프 추가
-residuals = Y_train - Y_trpred
-
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x=Y_trpred, y=residuals)
-plt.axhline(0, color='red', linestyle='--')
-plt.xlabel("Predicted Values")
-plt.ylabel("Residuals")
-plt.title("Residual Plot")
-plt.grid(True)
-save_path = os.path.join(image_save_dir, 'LASSO_TrainResidualPlot.png')
-plt.savefig(save_path, bbox_inches='tight', dpi=300)
-plt.show()
-
-plt.figure(figsize=(6, 6))
-stats.probplot(residuals, dist="norm", plot=plt)
-plt.title("QQ Plot of Residuals")
-plt.grid(True)
-save_path = os.path.join(image_save_dir, 'LASSO_ResidQQPlot.png')
-plt.savefig(save_path, bbox_inches='tight', dpi=300)
-plt.show()
-
-
+#%%
 # 실제값으로 복원한 값들
 Y_train_real = np.expm1(Y_train)
 Y_trpred_real = np.expm1(Y_trpred)
@@ -254,10 +234,20 @@ display(Score_real)
 
 
 #%%
-Resid_tr = Y_train.squeeze() - Y_trpred.squeeze()
-Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
+Resid_tr = Y_train.squeeze() - Y_trpred
+Resid_te = Y_test.squeeze() - Y_tepred
 
-sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.figure(figsize=(6, 6))
+stats.probplot(Resid_tr, dist="norm", plot=plt)
+plt.title("QQ Plot of Residuals")
+plt.grid(True)
+save_path = os.path.join(image_save_dir, 'LASSO_TrainResidQQPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+
+sns.scatterplot(x=Y_trpred, y=Resid_tr)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -266,7 +256,8 @@ plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
-sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+sns.scatterplot(x=Y_tepred, y=Resid_te)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
@@ -274,10 +265,11 @@ save_path = os.path.join(image_save_dir, 'RF_TestLogResidPlot.png')
 plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
-Resid_tr_true = Y_train_real.squeeze() - Y_trpred_real.squeeze()
-Resid_te_true = Y_test_real.squeeze() - Y_tepred_real.squeeze()
+Resid_tr_true = Y_train_real.squeeze() - Y_trpred_real
+Resid_te_true = Y_test_real.squeeze() - Y_tepred_real
 
-sns.scatterplot(x=Y_trpred_real.squeeze(), y=Resid_tr_true)
+sns.scatterplot(x=Y_trpred_real, y=Resid_tr_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -286,7 +278,8 @@ plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
-sns.scatterplot(x=Y_tepred_real.squeeze(), y=Resid_te_true)
+sns.scatterplot(x=Y_tepred_real, y=Resid_te_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
@@ -384,3 +377,5 @@ print(lasso_prediction.head())
 #%%
 submission_path = os.path.join(prediction_save_dir, 'lasso_prediction.csv')
 lasso_prediction.to_csv(submission_path, index=False)
+
+# %%

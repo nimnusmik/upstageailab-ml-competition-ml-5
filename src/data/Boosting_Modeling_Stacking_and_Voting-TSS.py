@@ -130,7 +130,7 @@ X_col = [
     '연식', '브랜드등급', '아파트이름길이', 
     '반경_지하철역_가중합', '지하철최단거리',
     '반경_버스정류장_가중합', '버스최단거리',
-    '총인구수', '좌표X', '좌표Y'
+    '인구비중', '좌표X', '좌표Y'
     # '성비(남/여)', 
     # 'loanrate_12m'
 ]
@@ -198,21 +198,15 @@ model_lgbm = LGBMRegressor(random_state=123)
 model_cb = CatBoostRegressor(verbose=2, random_state=123)
 
 # Meta Learner
-model_reg = LinearRegression()
-res = [
-    ('rf', model_rf),
-    ('hgb', model_hgb),
-    ('xgb', model_xgb),
-    ('lgbm', model_lgbm),
-    ('cb', model_cb),
-]
+model_reg = Lasso()
+res = [model_rf, model_hgb, model_xgb, model_lgbm, model_cb]
 model_stack = StackingCVRegressor(regressors=res, meta_regressor=model_reg, use_features_in_secondary=True)
 
 params = {}
 
 # params에서는 앞선 결과들 이용
 for key, val in model_rf_best_params.items():
-    params[f'randomforestregressor{key}'] = [val]
+    params[f'randomforestregressor__{key}'] = [val]
 
 for key, val in model_hgb_best_params.items():
     params[f'histgradientboostingregressor__{key}'] = [val]
@@ -373,6 +367,7 @@ Resid_tr = Y_train.squeeze() - Y_trpred.squeeze()
 Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
 
 sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
@@ -381,6 +376,7 @@ plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
@@ -392,6 +388,7 @@ Resid_tr_true = Y_train_true.squeeze() - Y_trpred_true.squeeze()
 Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
 
 sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -401,6 +398,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")

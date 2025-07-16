@@ -273,11 +273,17 @@ df['아파트이름길이'] = [len(i.strip()) if pd.notnull(i) else 0 for i in d
 population_pivot_df = population_df.pivot(index=['year', 'area'], columns='class', values='population').reset_index()
 # 성비
 population_pivot_df['성비(남/여)'] = round(population_pivot_df['남자인구수'] / population_pivot_df['여자인구수'], 4)
-# print(population_pivot_df.head())
+# 인구비중
+population_pivot_df['서울전체인구'] = population_pivot_df.groupby('year')['총인구수'].transform('sum')
+population_pivot_df['인구비중'] = population_pivot_df['총인구수'] / population_pivot_df['서울전체인구']
+print(population_pivot_df.head())
 
 df = pd.merge(df, population_pivot_df, how = 'left', left_on=('계약년도', '자치구'), right_on=('year', 'area'))
 
-
+# # 잘 들어갔는지 확인
+# check = df.groupby(['계약년월', '자치구'])['인구비중'].nunique()
+# inconsistent = check[check > 1]
+# inconsistent
 
 #%%
 ## 대출금리 데이터 추가
@@ -514,7 +520,7 @@ final_columns = [
                 '반경_300m_버스정류장_수',
 
                 # 인구수관련 변수
-                '총인구수',
+                '총인구수', '인구비중',
                 '성비(남/여)',
 
                 # # 과거 거래수 변수
@@ -542,6 +548,20 @@ test_clean = cleandf[cleandf['isTest'] == 1]
 
 train_clean.info()
 test_clean.info()
+
+
+
+#%%
+# 추가: Train 데이터 내에서 Test 데이터 내에있는 자치구의 분포 살펴보기
+sns.boxplot(data=train_clean[train_clean['자치구'].isin(test_clean['자치구'].unique())], x='자치구', y='target')
+plt.title("Train 내 test 자치구의 거래가 분포")
+plt.show()
+
+#%%
+# 추가: Train 데이터 내에서 Test 데이터 내에있는 법정동의 분포 살펴보기
+sns.boxplot(data=train_clean[train_clean['법정동'].isin(test_clean['법정동'].unique())], x='법정동', y='target')
+plt.title("Train 내 test 법정동의 거래가 분포")
+plt.show()
 
 
 #%%

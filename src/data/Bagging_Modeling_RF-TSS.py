@@ -120,17 +120,20 @@ display(df['법정동'].nunique()), display(test_df['법정동'].unique())      
 display(df['브랜드등급'].nunique()), display(test_df['브랜드등급'].unique())
 df.info(), test_df.info()
 
+train_subset = df[df['자치구'].isin(['강남구','강동구','강북구'])]
+train_subset
+
 
 
 #%%
-X_col = [ 
+X_col = [
     # '법정동',
     '계약년월idx', '강남3구여부', '전용면적', '층',
     # '홈페이지유무', '사용허가여부',                     # LightGBM결과 feature importance가 낮은 열 삭제
     '연식', '브랜드등급', '아파트이름길이', 
     '반경_지하철역_가중합', '지하철최단거리',
     '반경_버스정류장_가중합', '버스최단거리',
-    '총인구수', '좌표X', '좌표Y'
+    '인구비중', '좌표X', '좌표Y'
     # '성비(남/여)', 
     # 'loanrate_12m'
 ]
@@ -181,18 +184,27 @@ test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index
 #  Random Forest with CV
 ################################
 model_rf = RandomForestRegressor(random_state=123)
+
+# # 코드 테스트용
+# params = {
+#     'n_estimators': [200],
+#     'max_depth': [10, 20],
+#     'min_samples_split': [5],
+#     'min_samples_leaf': [5]
+# }
+
+# Trial 1
 params = {
     'n_estimators': [200, 300],
     'max_depth': [10, 20],
     'min_samples_split': [5, 10],
     'min_samples_leaf': [5, 10],
-    'max_features': ['sqrt', 0.3],
-    'bootstrap': [True]
+    'max_features': ['sqrt'],
 }
 
-# GridSearchCV 이용
+# GridSearchCV 템플릿 생성
 model_rf_cv = GridSearchCV(estimator=model_rf, param_grid=params, 
-                           cv=5, scoring='neg_root_mean_squared_error',  
+                           cv=tscv, scoring='neg_root_mean_squared_error',  
                            n_jobs=-1, verbose=2)   
 
 # # RandomizedSearchCV 이용
@@ -207,6 +219,7 @@ model_rf_cv = GridSearchCV(estimator=model_rf, param_grid=params,
 #     random_state=123
 # )
 
+# 학습
 model_rf_cv.fit(X_train_scaled, Y_train)
 print("최적 하이퍼 파라미터: ", model_rf_cv.best_params_)
 
@@ -260,6 +273,7 @@ Resid_tr = Y_train.squeeze() - Y_trpred.squeeze()
 Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
 
 sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -269,6 +283,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
@@ -280,6 +295,7 @@ Resid_tr_true = Y_train_true.squeeze() - Y_trpred_true.squeeze()
 Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
 
 sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -289,6 +305,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")

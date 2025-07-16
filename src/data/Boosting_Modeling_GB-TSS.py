@@ -130,7 +130,7 @@ X_col = [
     '연식', '브랜드등급', '아파트이름길이', 
     '반경_지하철역_가중합', '지하철최단거리',
     '반경_버스정류장_가중합', '버스최단거리',
-    '총인구수', '좌표X', '좌표Y'
+    '인구비중', '좌표X', '좌표Y'
     # '성비(남/여)', 
     # 'loanrate_12m'
 ]
@@ -214,10 +214,10 @@ model_hgb = HistGradientBoostingRegressor(random_state=123)
 
 # Trial #2
 params = {
-    'learning_rate': [0.05, 0.1, 0.15],
-    'max_depth': [9, 11, 13],  
+    'learning_rate': [0.1],
+    'max_depth': [9, 11, 13, 15],  
     'min_samples_leaf': [10, 20, 30],  
-    'max_iter': [1000, 1500, 2000]  
+    'max_iter': [1000, 1100, 1200]  
 }
 
 model_hgb_cv = GridSearchCV(
@@ -287,6 +287,7 @@ Resid_tr = Y_train.squeeze() - Y_trpred.squeeze()
 Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
 
 sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
@@ -296,6 +297,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
@@ -307,6 +309,7 @@ Resid_tr_true = Y_train_true.squeeze() - Y_trpred_true.squeeze()
 Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
 
 sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -316,6 +319,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")

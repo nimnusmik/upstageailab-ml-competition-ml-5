@@ -130,7 +130,7 @@ X_col = [
     '연식', '브랜드등급', '아파트이름길이', 
     '반경_지하철역_가중합', '지하철최단거리',
     '반경_버스정류장_가중합', '버스최단거리',
-    '총인구수', '좌표X', '좌표Y'
+    '인구비중', '좌표X', '좌표Y'
     # '성비(남/여)', 
     # 'loanrate_12m'
 ]
@@ -194,9 +194,9 @@ model_xgb = XGBRegressor(random_state=123, objective='reg:squarederror')
 # 첫번째 학습 시도 -> Best params = 
 params = {
     'n_estimators': [1000],     # early stopping 할 것이므로 크게 설정
-    'learning_rate': [0.01, 0.05, 0.1],
+    'learning_rate': [0.1],
     'max_depth': [5, 7, 9],
-    'gamma': [0, 0.1, 0.3],
+    'gamma': [0, 0.1],
     'min_child_weight': [5, 7],
     'subsample': [0.7, 1.0],
     'colsample_bytree': [0.7, 1.0]
@@ -302,6 +302,7 @@ Resid_val = Y_valid_final.squeeze() - Y_valpred.squeeze()
 Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
 
 sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
@@ -310,8 +311,8 @@ plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
-
 sns.scatterplot(x=Y_valpred.squeeze(), y=Resid_val)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Validation Residual Plot (log)")
@@ -321,6 +322,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
@@ -333,6 +335,7 @@ Resid_val_true = Y_valid_final_true.squeeze() - Y_valpred_true.squeeze()
 Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
 
 sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -342,6 +345,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_valpred_true.squeeze(), y=Resid_val_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Validation Residual Plot")
@@ -351,6 +355,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
