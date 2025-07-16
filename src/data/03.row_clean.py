@@ -1,5 +1,6 @@
 #%%
 # import package needed
+from IPython.display import display
 import os
 import pandas as pd
 import numpy as np
