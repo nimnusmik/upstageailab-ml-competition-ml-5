@@ -1,5 +1,6 @@
 #%%
 # import package needed
+from IPython.display import display
 import os
 import pandas as pd
 import numpy as np
@@ -47,7 +48,7 @@ cols = ['시군구', '번지', '본번', '부번', '아파트명', '계약년월
 
 # 모든 관측치가 동일한지 확인
 equal_rows = test_rawdf_original[cols].reset_index(drop=True).equals(test_rawdf[cols].reset_index(drop=True))
-# equal_rows
+equal_rows
 # True
 
 
@@ -488,7 +489,7 @@ final_columns = [
                 # 위치 변수
                 '자치구', '법정동', 
                 '본번', '부번', '번지', '도로명',     # 모델링에 쓰일 변수 아님. 03.row_clean.py에서 결측치 보간에 이용할 변수
-                '강남3구여부',
+                '강남3구여부', '좌표X', '좌표Y',
                 
                 # 아파트 특성 변수
                 '아파트명',                         # 모델링에 쓰일 변수 아님. 03.row_clean.py에서 결측치 제거에 이용할 변수
@@ -540,7 +541,7 @@ test_clean = cleandf[cleandf['isTest'] == 1]
 
 
 train_clean.info()
-
+test_clean.info()
 
 
 #%%
