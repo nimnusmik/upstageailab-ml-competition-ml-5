@@ -52,7 +52,6 @@ def plot_prediction(Y_true_pred):
     plt.xlabel('Index', fontname='serif', fontsize=28)
     plt.legend(fontsize=20)
     plt.grid()
-    plt.show()
 
 
 def evaluation_reg(Y_real, Y_pred):
