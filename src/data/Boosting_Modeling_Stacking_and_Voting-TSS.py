@@ -100,7 +100,7 @@ image_save_dir = '../../docs/image'
 os.makedirs(image_save_dir, exist_ok=True)
 
 # 모델 저장경로 생성
-model_save_dir = '../../model'
+model_save_dir = '../../model/Model_Stacking_and_Voting'
 os.makedirs(model_save_dir, exist_ok=True)
 
 # 예측값 저장경로 생성
@@ -175,6 +175,7 @@ test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index
 # 앞서 찾은 개별 모델들의 최적파라미터 이용
 
 model_rf_best_params = {}
+model_hgb_best_params = {'learning_rate': 0.1, 'max_depth': 9, 'max_iter': 1000, 'min_samples_leaf': 20}
 model_xgb_best_params = {}
 model_lgbm_best_params = {}
 model_cb_best_params = {}
@@ -191,29 +192,39 @@ model_cb_best_params = {}
 # model_svm = SVR()
 
 model_rf = RandomForestRegressor(random_state=123)
+model_hgb = HistGradientBoostingRegressor(random_state=123)
 model_xgb = XGBRegressor(random_state=123)
 model_lgbm = LGBMRegressor(random_state=123)
 model_cb = CatBoostRegressor(verbose=2, random_state=123)
 
 # Meta Learner
 model_reg = LinearRegression()
-res = [model_rf, model_xgb, model_lgbm, model_cb]
+res = [
+    ('rf', model_rf),
+    ('hgb', model_hgb),
+    ('xgb', model_xgb),
+    ('lgbm', model_lgbm),
+    ('cb', model_cb),
+]
 model_stack = StackingCVRegressor(regressors=res, meta_regressor=model_reg, use_features_in_secondary=True)
 
 params = {}
 
 # params에서는 앞선 결과들 이용
 for key, val in model_rf_best_params.items():
-    params[f'regressor__rf__{key}'] = [val]
+    params[f'randomforestregressor{key}'] = [val]
+
+for key, val in model_hgb_best_params.items():
+    params[f'histgradientboostingregressor__{key}'] = [val]
 
 for key, val in model_xgb_best_params.items():
-    params[f'regressor__xgb__{key}'] = [val]
+    params[f'xgbregressor__{key}'] = [val]
 
 for key, val in model_lgbm_best_params.items():
-    params[f'regressor__lgbm__{key}'] = [val]
+    params[f'lgbmregressor__{key}'] = [val]
 
 for key, val in model_cb_best_params.items():
-    params[f'regressor__cb__{key}'] = [val]
+    params[f'catboostregressor__{key}'] = [val]
 
 
 model_stack_cv = GridSearchCV(estimator=model_stack, param_grid=params, 
@@ -227,7 +238,14 @@ Y_tepred = pd.DataFrame(model_stack_cv.predict(X_test_scaled),
                         index=Y_test.index, columns=['Pred'])
 
 plot_prediction(pd.concat([Y_train, Y_trpred], axis=1).reset_index().iloc[:,1:])
+save_path = os.path.join(image_save_dir, 'Stacking_TrainPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
 plot_prediction(pd.concat([Y_test, Y_tepred], axis=1).reset_index().iloc[:,1:])
+save_path = os.path.join(image_save_dir, 'Stacking_TestPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
 
 Y_train_true = np.expm1(Y_train)
 Y_test_true = np.expm1(Y_test)
@@ -246,6 +264,8 @@ sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'Stacking_TrainLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -253,7 +273,10 @@ sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'Stacking_TestLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
+
 
 Resid_tr_true = Y_train_true.squeeze() - Y_trpred_true.squeeze()
 Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
@@ -262,6 +285,8 @@ sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
+save_path = os.path.join(image_save_dir, 'Stacking_TrainResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -269,6 +294,8 @@ sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
+save_path = os.path.join(image_save_dir, 'Stacking_TestResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -309,6 +336,7 @@ Stack_CV_prediction.to_csv(submission_path, index=False)
 voting_model = VotingRegressor(
     estimators=[
         ('rf', model_rf_best_params),
+        ('hgb', model_hgb_best_params)
         ('xgb', model_xgb_best_params),
         ('lgbm', model_lgbm_best_params),
         ('cb', model_cb_best_params)
@@ -321,7 +349,14 @@ Y_trpred = voting_model.predict(X_train_scaled)
 Y_tepred = voting_model.predict(X_test_scaled)
 
 plot_prediction(pd.concat([Y_train, Y_trpred], axis=1).reset_index().iloc[:,1:])
+save_path = os.path.join(image_save_dir, 'Voting_TrainPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
 plot_prediction(pd.concat([Y_test, Y_tepred], axis=1).reset_index().iloc[:,1:])
+save_path = os.path.join(image_save_dir, 'Voting_TestPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
 
 Y_train_true = np.expm1(Y_train)
 Y_test_true = np.expm1(Y_test)
@@ -341,13 +376,16 @@ sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'Voting_TrainLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
-
 
 sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'Voting_TestLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 Resid_tr_true = Y_train_true.squeeze() - Y_trpred_true.squeeze()
@@ -357,6 +395,8 @@ sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
+save_path = os.path.join(image_save_dir, 'Voting_TrainResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -364,6 +404,8 @@ sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
+save_path = os.path.join(image_save_dir, 'Voting_TestResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 

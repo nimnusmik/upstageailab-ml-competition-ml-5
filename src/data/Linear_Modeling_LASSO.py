@@ -54,7 +54,7 @@ df_cleaned = df.copy()
 
 
 # 이미지 저장경로 생성
-image_save_dir = '../../docs/image'
+image_save_dir = '../../docs/image/Model_LASSO'
 os.makedirs(image_save_dir, exist_ok=True)
 
 # 모델 저장경로 생성
@@ -217,6 +217,30 @@ display(coef_df)
 Y_trpred = lasso_model.predict(X_train_fe)
 Y_tepred = lasso_model.predict(X_test_fe)
 
+
+# train잔차 그래프 추가
+residuals = Y_train - Y_trpred
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=Y_trpred, y=residuals)
+plt.axhline(0, color='red', linestyle='--')
+plt.xlabel("Predicted Values")
+plt.ylabel("Residuals")
+plt.title("Residual Plot")
+plt.grid(True)
+save_path = os.path.join(image_save_dir, 'LASSO_TrainResidualPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+plt.figure(figsize=(6, 6))
+stats.probplot(residuals, dist="norm", plot=plt)
+plt.title("QQ Plot of Residuals")
+plt.grid(True)
+save_path = os.path.join(image_save_dir, 'LASSO_ResidQQPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+
 # 실제값으로 복원한 값들
 Y_train_real = np.expm1(Y_train)
 Y_trpred_real = np.expm1(Y_trpred)
@@ -227,6 +251,50 @@ Y_tepred_real = np.expm1(Y_tepred)
 # 평가
 Score_real = evaluation_reg_trte(Y_train_real, Y_trpred_real, Y_test_real, Y_tepred_real)
 display(Score_real)
+
+
+#%%
+Resid_tr = Y_train.squeeze() - Y_trpred.squeeze()
+Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
+
+sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.xlabel("Predicted")
+plt.ylabel("Residual")
+plt.title("Train Residual Plot")
+save_path = os.path.join(image_save_dir, 'RF_TrainLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+
+sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+plt.xlabel("Predicted")
+plt.ylabel("Residual")
+plt.title("Test Residual Plot")
+save_path = os.path.join(image_save_dir, 'RF_TestLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+Resid_tr_true = Y_train_real.squeeze() - Y_trpred_real.squeeze()
+Resid_te_true = Y_test_real.squeeze() - Y_tepred_real.squeeze()
+
+sns.scatterplot(x=Y_trpred_real.squeeze(), y=Resid_tr_true)
+plt.xlabel("Predicted")
+plt.ylabel("Residual")
+plt.title("Train Residual Plot")
+save_path = os.path.join(image_save_dir, 'RF_TrainResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+
+sns.scatterplot(x=Y_tepred_real.squeeze(), y=Resid_te_true)
+plt.xlabel("Predicted")
+plt.ylabel("Residual")
+plt.title("Test Residual Plot")
+save_path = os.path.join(image_save_dir, 'RF_TestResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+
 
 #%%
 # LASSO가 선택한 변수만 추출

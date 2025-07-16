@@ -96,7 +96,7 @@ test_df['계약년월idx'] = ((test_df['계약년도'] - 2007) * 12 + test_df['�
 
 
 # 이미지 저장경로 생성
-image_save_dir = '../../docs/image'
+image_save_dir = '../../docs/image/Model_LGBM'
 os.makedirs(image_save_dir, exist_ok=True)
 
 # 모델 저장경로 생성
@@ -245,7 +245,11 @@ features = X_train.columns
 plt.figure(figsize=(10, 6))
 plt.barh(features, importances)
 plt.title("LightGBM Feature Importances")
+save_path = os.path.join(image_save_dir, 'LGBM_Feature_Importance.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
+
+
 
 
 #%%
@@ -285,7 +289,19 @@ Y_tepred = pd.DataFrame(model_lgbm_cv_final.predict(X_test_scaled),
                         index=Y_test.index, columns=['Pred'])
 
 plot_prediction(pd.concat([Y_train_final, Y_trpred], axis=1).reset_index().iloc[:, 1:])
+save_path = os.path.join(image_save_dir, 'LGBM_TrainPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
 plot_prediction(pd.concat([Y_valid_final, Y_valpred], axis=1).reset_index().iloc[:, 1:])
+save_path = os.path.join(image_save_dir, 'LGBM_ValidPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
+plot_prediction(pd.concat([Y_test, Y_tepred], axis=1).reset_index().iloc[:, 1:])
+save_path = os.path.join(image_save_dir, 'LGBM_TestPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
 
 Y_train_final_true = np.expm1(Y_train_final)
 Y_valid_final_true = np.expm1(Y_valid_final)
@@ -312,6 +328,8 @@ sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'LGBM_TrainLogResidPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -319,6 +337,8 @@ sns.scatterplot(x=Y_valpred.squeeze(), y=Resid_val)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Validation Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'LGBM_ValidLogResidPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -326,6 +346,8 @@ sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'LGBM_TestLogResidPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 Resid_tr_true = Y_train_final_true.squeeze() - Y_trpred_true.squeeze()
@@ -336,6 +358,8 @@ sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
+save_path = os.path.join(image_save_dir, 'LGBM_TrainResidPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -343,6 +367,8 @@ sns.scatterplot(x=Y_valpred_true.squeeze(), y=Resid_val_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Validation Residual Plot")
+save_path = os.path.join(image_save_dir, 'LGBM_ValidResidPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -350,6 +376,8 @@ sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
+save_path = os.path.join(image_save_dir, 'LGBM_TestResidPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 

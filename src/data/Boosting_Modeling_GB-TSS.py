@@ -96,7 +96,7 @@ test_df['계약년월idx'] = ((test_df['계약년도'] - 2007) * 12 + test_df['�
 
 
 # 이미지 저장경로 생성
-image_save_dir = '../../docs/image'
+image_save_dir = '../../docs/image/Model_GB'
 os.makedirs(image_save_dir, exist_ok=True)
 
 # 모델 저장경로 생성
@@ -203,11 +203,21 @@ test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index
 ##########################################################################
 
 model_hgb = HistGradientBoostingRegressor(random_state=123)
+# # Trial #1
+# params = {
+#     'learning_rate': [0.01, 0.05, 0.1],
+#     'max_depth': [5, 7, 9],
+#     'min_samples_leaf': [5, 10, 20],
+#     'max_iter': [300, 500, 700, 1000] 
+# }
+# # Best params -> model_gb_best_params = {'learning_rate': 0.1, 'max_depth': 9, 'max_iter': 1000, 'min_samples_leaf': 20}
+
+# Trial #2
 params = {
-    'learning_rate': [0.01, 0.05, 0.1],
-    'max_depth': [5, 7, 9],
-    'min_samples_leaf': [5, 10, 20],
-    'max_iter': [300, 500, 700, 1000] 
+    'learning_rate': [0.05, 0.1, 0.15],
+    'max_depth': [9, 11, 13],  
+    'min_samples_leaf': [10, 20, 30],  
+    'max_iter': [1000, 1500, 2000]  
 }
 
 model_hgb_cv = GridSearchCV(
@@ -251,8 +261,16 @@ Y_trpred = pd.DataFrame(model_hgb_cv_final.predict(X_train_scaled),
 Y_tepred = pd.DataFrame(model_hgb_cv_final.predict(X_test_scaled), 
                         index=Y_test.index, columns=['Pred'])
 
+    
 plot_prediction(pd.concat([Y_train, Y_trpred], axis=1).reset_index().iloc[:,1:])
+save_path = os.path.join(image_save_dir, 'GB_TrainPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
+
 plot_prediction(pd.concat([Y_test, Y_tepred], axis=1).reset_index().iloc[:,1:])
+save_path = os.path.join(image_save_dir, 'GB_TestPred.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
+plt.show()
 
 Y_train_true = np.expm1(Y_train)
 Y_test_true = np.expm1(Y_test)
@@ -272,6 +290,8 @@ sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'GB_TrainLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -279,6 +299,8 @@ sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
+save_path = os.path.join(image_save_dir, 'GB_TestLogResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 Resid_tr_true = Y_train_true.squeeze() - Y_trpred_true.squeeze()
@@ -288,6 +310,8 @@ sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
+save_path = os.path.join(image_save_dir, 'GB_TrainResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -295,6 +319,8 @@ sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
+save_path = os.path.join(image_save_dir, 'GB_TestResidPlot.png')
+plt.savefig(save_path, bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -320,218 +346,3 @@ print(HGB_CV_prediction.head())
 submission_path = os.path.join(prediction_save_dir, 'HGB_prediction.csv')
 HGB_CV_prediction.to_csv(submission_path, index=False)
 
-
-
-
-
-
-
-
-
-
-#%%
-################################
-#  LightGBM with CV
-################################
-
-
-
-#%%
-##### TEST CELL #####
-# 데이터 flat한지확인용(분기잘되는지)
-model = LGBMRegressor(
-    max_depth=10,
-    min_child_samples=1,
-    subsample=1.0,
-    colsample_bytree=1.0,
-    n_estimators=100,
-    random_state=123,
-
-)
-model.fit(X_train_scaled, Y_train)
-
-
-# 시각화
-plt.figure(figsize=(10, 6))
-plt.barh(X_train.columns, model.feature_importances_)
-plt.title("Feature Importances")
-plt.show()
-
-
-
-
-#%%
-##### HYPERPARAMETER 조정 #####
-model_lgbm = LGBMRegressor(random_state=123, n_jobs=-1)
-
-# # 코드 테스트용
-# params = {
-#     'n_estimators': [100],
-#     'learning_rate': [0.01, 0.1],
-#     'max_depth': [10],
-#     'min_child_samples': [5],
-#     'subsample': [1.0],
-#     'colsample_bytree': [1.0],
-#     'reg_alpha': [0],
-#     'reg_lambda': [0.1]
-# }
-
-# 첫번째 학습 시도 -> Best params = 
-params = {
-    'n_estimators': [1000],                    
-    'learning_rate': [0.01, 0.05, 0.1],       
-    'max_depth': [5, 10],  
-    'min_child_samples': [10, 20],   
-    'subsample': [0.7, 1.0],     
-    'colsample_bytree': [0.7, 1.0],  
-    'reg_alpha': [0, 0.1],    
-    'reg_lambda': [0, 0.1],    
-    'num_threads': [-1]
-}
-
-
-
-
-model_lgbm_cv = GridSearchCV(estimator=model_lgbm, param_grid=params, 
-                             cv=tscv, scoring='neg_root_mean_squared_error',   
-                             n_jobs=-1, verbose=1, error_score='raise')   
-model_lgbm_cv.fit(X_train_scaled, Y_train)
-print("LightGBM 최적 하이퍼 파라미터: ", model_lgbm_cv.best_params_)
-
-lgbm_model = model_lgbm_cv.best_estimator_
-importances = lgbm_model.feature_importances_
-features = X_train.columns
-
-plt.figure(figsize=(10, 6))
-plt.barh(features, importances)
-plt.title("LightGBM Feature Importances")
-plt.show()
-
-
-
-#%%
-# TimeSeriesSplit
-for train_idx, valid_idx in tscv.split(X_train_scaled):
-    pass  # 마지막 split 사용
-
-X_train_final = X_train_scaled[train_idx]
-Y_train_final = Y_train.iloc[train_idx]
-X_valid_final = X_train_scaled[valid_idx]
-Y_valid_final = Y_train.iloc[valid_idx]
-
-# 최종 모델 학습 (early stopping 포함)
-# 위에서 설정한 n_estimators = 1000을 10000으로 수정
-# best_params_ 복사 후 수정
-params = model_lgbm_cv.best_params_.copy()
-params['n_estimators'] = 10000  # early stopping을 위해 충분히 크게 설정
-
-
-model_lgbm_cv_final = LGBMRegressor(
-    **params,
-    random_state=123
-)
-
-model_lgbm_cv_final.fit(
-    X_train_final, Y_train_final,
-    eval_set=[(X_valid_final, Y_valid_final)],
-    callbacks=[early_stopping(stopping_rounds=20), log_evaluation(period=10)],
-    eval_metric='rmse'
-)
-
-Y_trpred = pd.DataFrame(model_lgbm_cv_final.predict(X_train_final), 
-                        index=Y_train_final.index, columns=['Pred'])
-Y_valpred = pd.DataFrame(model_lgbm_cv_final.predict(X_valid_final), 
-                        index=Y_valid_final.index, columns=['Pred'])
-Y_tepred = pd.DataFrame(model_lgbm_cv_final.predict(X_test_scaled), 
-                        index=Y_test.index, columns=['Pred'])
-
-plot_prediction(pd.concat([Y_train_final, Y_trpred], axis=1).reset_index().iloc[:, 1:])
-plot_prediction(pd.concat([Y_valid_final, Y_valpred], axis=1).reset_index().iloc[:, 1:])
-
-Y_train_final_true = np.expm1(Y_train_final)
-Y_valid_final_true = np.expm1(Y_valid_final)
-Y_test_true = np.expm1(Y_test)
-Y_trpred_true = np.expm1(Y_trpred)
-Y_valpred_true = np.expm1(Y_valpred)
-Y_tepred_true = np.expm1(Y_tepred)
-
-Score_lgbm_valid = evaluation_reg_trte(Y_train_final_true, Y_trpred_true, Y_valid_final_true, Y_valpred_true)
-Score_lgbm_valid.index = ['Train', 'Valid']
-display(Score_lgbm_valid)
-
-Score_lgbm = evaluation_reg_trte(Y_train_final_true, Y_trpred_true, Y_test_true, Y_tepred_true)
-display(Score_lgbm)
-
-
-
-#%%
-Resid_tr = Y_train.squeeze() - Y_trpred.squeeze()
-Resid_val = Y_valid_final.squeeze() - Y_valpred.squeeze()
-Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
-
-sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
-plt.xlabel("Predicted")
-plt.ylabel("Residual")
-plt.title("Train Residual Plot (log)")
-plt.show()
-
-
-sns.scatterplot(x=Y_valpred.squeeze(), y=Resid_val)
-plt.xlabel("Predicted")
-plt.ylabel("Residual")
-plt.title("Validation Residual Plot (log)")
-plt.show()
-
-
-sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
-plt.xlabel("Predicted")
-plt.ylabel("Residual")
-plt.title("Test Residual Plot (log)")
-plt.show()
-
-Resid_tr_true = Y_train_final_true.squeeze() - Y_trpred_true.squeeze()
-Resid_val_true = Y_valid_final_true.squeeze() - Y_valpred_true.squeeze()
-Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
-
-sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
-plt.xlabel("Predicted")
-plt.ylabel("Residual")
-plt.title("Train Residual Plot")
-plt.show()
-
-
-sns.scatterplot(x=Y_valpred_true.squeeze(), y=Resid_val_true)
-plt.xlabel("Predicted")
-plt.ylabel("Residual")
-plt.title("Validation Residual Plot")
-plt.show()
-
-
-sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
-plt.xlabel("Predicted")
-plt.ylabel("Residual")
-plt.title("Test Residual Plot")
-plt.show()
-
-
-#%%
-# 모델 저장
-model_path = os.path.join(model_save_dir, 'LightGBM.pkl')
-joblib.dump(model_lgbm_cv_final, model_path)
-
-model_lgbm_cv_final = joblib.load(model_path)
-
-# 대회 test데이터에 대해 예측
-test_pred_log = model_lgbm_cv_final.predict(test_df_scaled)
-test_pred = np.expm1(test_pred_log)
-
-LGBM_CV_prediction = test_pred.copy()
-LGBM_CV_prediction = pd.DataFrame(LGBM_CV_prediction, columns=["target"])
-
-# 정수형으로 변환
-LGBM_CV_prediction["target"] = np.clip(np.round(LGBM_CV_prediction["target"]), 0, None).astype(int)
-print(LGBM_CV_prediction.head())
-
-# 예측값저장
-submission_path = os.path.join(prediction_save_dir, 'LGBM_TSS_prediction.csv')
-LGBM_CV_prediction.to_csv(submission_path, index=False)
