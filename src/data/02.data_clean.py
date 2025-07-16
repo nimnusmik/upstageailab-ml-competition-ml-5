@@ -330,6 +330,9 @@ final_columns = [
                 '연식',
                 '브랜드등급',
                 '아파트이름길이', 
+                
+                # 위도, 경도 변수
+                '좌표X', '좌표Y',
 
                 # 지하철관련 변수
                 '지하철최단거리',
@@ -369,7 +372,7 @@ train_clean.info()
 
 #%%
 # make data folder 'cleaned_data'
-data_dir = '../../data/processed/cleaned_data'
+data_dir = '../../data/processed/clean_data'
 os.makedirs(data_dir, exist_ok=True)
 
 # save 'train_clean.csv' and 'test_clean.csv'
