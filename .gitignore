@@ -168,6 +168,7 @@ data/processed/transportation-features/train_transportation_merged.csv
 **/train_geocoded.csv
 data/processed/geocoding-missing-coords/train_geocoded_train.csv
 bfg.jar
+src/data/catboost_info/
 
 # 제외 되면 안되는 필요한 파일 예외처리
 !data/logs/**/*.log
