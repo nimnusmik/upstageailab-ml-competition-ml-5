@@ -170,6 +170,6 @@ data/ephemeral/home/aibootcamp14/upstageailab-ml-competition-ml-5/images
 data/processed/engineered_data
 
 src/data/archive
-햣
+
 # 제외 되면 안되는 필요한 파일 예외처리
 !data/logs/**/*.log
