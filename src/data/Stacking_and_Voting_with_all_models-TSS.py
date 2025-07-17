@@ -41,7 +41,6 @@ from lightgbm import LGBMRegressor, early_stopping, log_evaluation
 from xgboost import plot_importance as plot_importance_xgb
 from lightgbm import plot_importance as plot_importance_lgbm
 from catboost import Pool, CatBoostRegressor
-from mlxtend.regressor import StackingRegressor, StackingCVRegressor
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV, RandomizedSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn import metrics
@@ -96,11 +95,11 @@ test_df['계약년월idx'] = ((test_df['계약년도'] - 2007) * 12 + test_df['�
 
 
 # 이미지 저장경로 생성
-image_save_dir = '../../docs/image'
+image_save_dir = '../../docs/image/Model_Stacking_and_Voting'
 os.makedirs(image_save_dir, exist_ok=True)
 
 # 모델 저장경로 생성
-model_save_dir = '../../model/Model_Stacking_and_Voting'
+model_save_dir = '../../model'
 os.makedirs(model_save_dir, exist_ok=True)
 
 # 예측값 저장경로 생성
@@ -169,66 +168,64 @@ test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index
 
 
 
-
-
 #%%
 # 앞서 찾은 개별 모델들의 최적파라미터 이용
 
-model_rf_best_params = {}
-model_hgb_best_params = {'learning_rate': 0.1, 'max_depth': 9, 'max_iter': 1000, 'min_samples_leaf': 20}
-model_xgb_best_params = {}
-model_lgbm_best_params = {}
-model_cb_best_params = {}
+model_rf_best_params = {'max_depth': 20, 'max_features': 'sqrt', 'min_samples_leaf': 5, 'n_estimators': 200}
+model_hgb_best_params = {'learning_rate': 0.1, 'max_depth': 15, 'max_iter': 1200, 'min_samples_leaf': 10}
+model_xgb_best_params = {'colsample_bytree': 1.0, 'gamma': 0, 'learning_rate': 0.1, 'max_depth': 9, 'min_child_weight': 5, 'n_estimators': 1000, 'subsample': 1.0}
+model_lgbm_best_params =  {'colsample_bytree': 1.0, 'learning_rate': 0.1, 'max_depth': 9, 'min_child_samples': 10, 'n_estimators': 1000, 'reg_alpha': 0, 'reg_lambda': 0.1, 'subsample': 0.7}
+model_cb_best_params =  {'colsample_bylevel': 1.0, 'l2_leaf_reg': 3, 'learning_rate': 0.1, 'max_depth': 9, 'n_estimators': 1000, 'subsample': 0.7 }
+
+
+
+
+
+
+
 
 
 
 
 #%%
 ################################
-#  Stacking with CV
+#  Stacking
 ################################
 ## Weak Learners
 # model_knn = KNeighborsRegressor()
 # model_svm = SVR()
+model_rf = RandomForestRegressor(**model_rf_best_params, random_state=123)
+model_hgb = HistGradientBoostingRegressor(**model_hgb_best_params, random_state=123)
+model_xgb = XGBRegressor(**model_xgb_best_params, random_state=123)
+model_lgbm = LGBMRegressor(**model_lgbm_best_params, random_state=123)
+model_cb = CatBoostRegressor(**model_cb_best_params, verbose=100, random_state=123)
 
-model_rf = RandomForestRegressor(random_state=123)
-model_hgb = HistGradientBoostingRegressor(random_state=123)
-model_xgb = XGBRegressor(random_state=123)
-model_lgbm = LGBMRegressor(random_state=123)
-model_cb = CatBoostRegressor(verbose=2, random_state=123)
-
-# Meta Learner
-model_reg = Lasso()
-res = [model_rf, model_hgb, model_xgb, model_lgbm, model_cb]
-model_stack = StackingCVRegressor(regressors=res, meta_regressor=model_reg, use_features_in_secondary=True)
-
-params = {}
-
-# params에서는 앞선 결과들 이용
-for key, val in model_rf_best_params.items():
-    params[f'randomforestregressor__{key}'] = [val]
-
-for key, val in model_hgb_best_params.items():
-    params[f'histgradientboostingregressor__{key}'] = [val]
-
-for key, val in model_xgb_best_params.items():
-    params[f'xgbregressor__{key}'] = [val]
-
-for key, val in model_lgbm_best_params.items():
-    params[f'lgbmregressor__{key}'] = [val]
-
-for key, val in model_cb_best_params.items():
-    params[f'catboostregressor__{key}'] = [val]
+## Meta Learner
+model_reg = GradientBoostingRegressor(n_estimators=100, max_depth=3)
 
 
-model_stack_cv = GridSearchCV(estimator=model_stack, param_grid=params, 
-                              cv=tscv, 
-                              n_jobs=-1, verbose=2) 
-model_stack_cv.fit(X_train_scaled, Y_train)
+res = [
+    ('rf', model_rf), 
+    ('hgb', model_hgb), 
+    ('xgb', model_xgb), 
+    ('lgbm', model_lgbm),
+    ('cb', model_cb)
+]
 
-Y_trpred = pd.DataFrame(model_stack_cv.predict(X_train_scaled), 
+## StackingRegression
+model_stack = StackingRegressor(
+    estimators=res,
+    final_estimator=model_reg,
+    passthrough=False,
+    n_jobs=-1,
+    verbose=1
+)
+
+model_stack.fit(X_train_scaled, Y_train)
+
+Y_trpred = pd.DataFrame(model_stack.predict(X_train_scaled), 
                         index=Y_train.index, columns=['Pred'])
-Y_tepred = pd.DataFrame(model_stack_cv.predict(X_test_scaled), 
+Y_tepred = pd.DataFrame(model_stack.predict(X_test_scaled), 
                         index=Y_test.index, columns=['Pred'])
 
 plot_prediction(pd.concat([Y_train, Y_trpred], axis=1).reset_index().iloc[:,1:])
@@ -255,6 +252,7 @@ Resid_tr = Y_train.squeeze() - Y_trpred.squeeze()
 Resid_te = Y_test.squeeze() - Y_tepred.squeeze()
 
 sns.scatterplot(x=Y_trpred.squeeze(), y=Resid_tr)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot (log)")
@@ -264,6 +262,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred.squeeze(), y=Resid_te)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot (log)")
@@ -276,6 +275,7 @@ Resid_tr_true = Y_train_true.squeeze() - Y_trpred_true.squeeze()
 Resid_te_true = Y_test_true.squeeze() - Y_tepred_true.squeeze()
 
 sns.scatterplot(x=Y_trpred_true.squeeze(), y=Resid_tr_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Train Residual Plot")
@@ -285,6 +285,7 @@ plt.show()
 
 
 sns.scatterplot(x=Y_tepred_true.squeeze(), y=Resid_te_true)
+plt.axhline(0, color='red', linestyle='--')
 plt.xlabel("Predicted")
 plt.ylabel("Residual")
 plt.title("Test Residual Plot")
@@ -296,12 +297,12 @@ plt.show()
 #%%
 # 모델 저장
 model_path = os.path.join(model_save_dir, 'model_stack.pkl')
-joblib.dump(model_stack_cv, model_path)
+joblib.dump(model_stack, model_path)
 
-model_stack_cv = joblib.load(model_path)
+model_stack = joblib.load(model_path)
 
 # 대회 test데이터에 대해 예측
-test_pred_log = model_stack_cv.predict(test_df_scaled)
+test_pred_log = model_stack.predict(test_df_scaled)
 test_pred = np.expm1(test_pred_log)
 
 Stack_CV_prediction = test_pred.copy()
@@ -327,20 +328,43 @@ Stack_CV_prediction.to_csv(submission_path, index=False)
 
 #%% 
 # 앙상블 Voting
+model_rf = RandomForestRegressor(**model_rf_best_params, random_state=123)
+model_hgb = HistGradientBoostingRegressor(**model_hgb_best_params, random_state=123)
+model_xgb = XGBRegressor(**model_xgb_best_params, random_state=123)
+model_lgbm = LGBMRegressor(**model_lgbm_best_params, random_state=123)
+model_cb = CatBoostRegressor(**model_cb_best_params, verbose=100, random_state=123)
+
+# voting_model = VotingRegressor(
+#     estimators=[
+#         ('xgb', model_xgb),
+#         ('lgbm', model_lgbm),
+#         ('cb', model_cb),
+#         ('rf', model_rf),
+#         ('hgb', model_hgb)
+#     ]
+# )
+
 voting_model = VotingRegressor(
     estimators=[
-        ('rf', model_rf_best_params),
-        ('hgb', model_hgb_best_params)
-        ('xgb', model_xgb_best_params),
-        ('lgbm', model_lgbm_best_params),
-        ('cb', model_cb_best_params)
-    ]
+        # ('xgb', model_xgb),
+        # ('lgbm', model_lgbm),
+        # ('cb', model_cb),
+        ('rf', model_rf),
+        ('hgb', model_hgb)
+    ],
+    weights = [1, 2]
 )
+
+
 
 voting_model.fit(X_train_scaled, Y_train)
 
+#%%
 Y_trpred = voting_model.predict(X_train_scaled)
+Y_trpred = pd.Series(Y_trpred, index=Y_train.index, name='Pred')
+
 Y_tepred = voting_model.predict(X_test_scaled)
+Y_tepred = pd.Series(Y_tepred, index=Y_test.index, name='Pred')
 
 plot_prediction(pd.concat([Y_train, Y_trpred], axis=1).reset_index().iloc[:,1:])
 save_path = os.path.join(image_save_dir, 'Voting_TrainPred.png')
