@@ -26,3 +26,4 @@ torchelastic==0.2.2
 torchvision==0.16.0
 tqdm==4.66.1
 wget==3.2
+catboost==1.2.8
