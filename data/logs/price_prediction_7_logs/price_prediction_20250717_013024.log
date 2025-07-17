@@ -88,3 +88,65 @@ And if memory is not enough, you can set `force_col_wise=true`.
 2025-07-17 01:38:53 | Trial 2 | RMSE: 0.17880 | Params: {'learning_rate': 0.0282185021166848, 'feature_fraction': 0.7892904793220681, 'bagging_fraction': 0.9845619084615361, 'bagging_freq': 1, 'num_leaves': 61, 'max_depth': 18, 'min_child_samples': 44}
 2025-07-17 01:40:25 | Trial 3 | RMSE: 0.19484 | Params: {'learning_rate': 0.01313139129643711, 'feature_fraction': 0.816186031479492, 'bagging_fraction': 0.7005441707524201, 'bagging_freq': 4, 'num_leaves': 46, 'max_depth': 14, 'min_child_samples': 13}
 2025-07-17 01:42:25 | Trial 4 | RMSE: 0.17773 | Params: {'learning_rate': 0.042887724417039835, 'feature_fraction': 0.8543291936773965, 'bagging_fraction': 0.7144075630751632, 'bagging_freq': 6, 'num_leaves': 34, 'max_depth': 14, 'min_child_samples': 18}
+2025-07-17 01:45:59 | Trial 5 | RMSE: 0.17059 | Params: {'learning_rate': 0.048796058528723596, 'feature_fraction': 0.7366207193934361, 'bagging_fraction': 0.9796355613204093, 'bagging_freq': 1, 'num_leaves': 99, 'max_depth': 20, 'min_child_samples': 35}
+2025-07-17 01:47:59 | Trial 6 | RMSE: 0.19119 | Params: {'learning_rate': 0.014732829813033246, 'feature_fraction': 0.71711791187842, 'bagging_fraction': 0.9619103503977022, 'bagging_freq': 7, 'num_leaves': 51, 'max_depth': 10, 'min_child_samples': 14}
+2025-07-17 01:50:34 | Trial 7 | RMSE: 0.18586 | Params: {'learning_rate': 0.025692736664120988, 'feature_fraction': 0.7148669084004438, 'bagging_fraction': 0.9881299161989903, 'bagging_freq': 1, 'num_leaves': 39, 'max_depth': 8, 'min_child_samples': 29}
+2025-07-17 01:53:06 | Trial 8 | RMSE: 0.17240 | Params: {'learning_rate': 0.039563704149270115, 'feature_fraction': 0.7631650976085586, 'bagging_fraction': 0.7588865313367259, 'bagging_freq': 6, 'num_leaves': 79, 'max_depth': 7, 'min_child_samples': 27}
+2025-07-17 01:55:44 | Trial 9 | RMSE: 0.16952 | Params: {'learning_rate': 0.04970969770759026, 'feature_fraction': 0.8955362847296173, 'bagging_fraction': 0.7333341182035656, 'bagging_freq': 5, 'num_leaves': 82, 'max_depth': 18, 'min_child_samples': 26}
+2025-07-17 01:57:59 | Trial 10 | RMSE: 0.17210 | Params: {'learning_rate': 0.04872146861873247, 'feature_fraction': 0.994970195388514, 'bagging_fraction': 0.8195079914771102, 'bagging_freq': 4, 'num_leaves': 84, 'max_depth': 19, 'min_child_samples': 22}
+2025-07-17 02:01:15 | Trial 11 | RMSE: 0.16905 | Params: {'learning_rate': 0.04871443094969133, 'feature_fraction': 0.9140552399216154, 'bagging_fraction': 0.8841587359791807, 'bagging_freq': 3, 'num_leaves': 100, 'max_depth': 20, 'min_child_samples': 35}
+2025-07-17 02:04:16 | Trial 12 | RMSE: 0.17095 | Params: {'learning_rate': 0.04062397261172791, 'feature_fraction': 0.934740890016156, 'bagging_fraction': 0.8724574312962692, 'bagging_freq': 3, 'num_leaves': 91, 'max_depth': 17, 'min_child_samples': 48}
+2025-07-17 02:06:52 | Trial 13 | RMSE: 0.17362 | Params: {'learning_rate': 0.034460172311340014, 'feature_fraction': 0.9395673674903825, 'bagging_fraction': 0.8362413781508871, 'bagging_freq': 5, 'num_leaves': 72, 'max_depth': 20, 'min_child_samples': 34}
+2025-07-17 02:09:59 | Trial 14 | RMSE: 0.16950 | Params: {'learning_rate': 0.04990232165709817, 'feature_fraction': 0.912002051750839, 'bagging_fraction': 0.8839752604647726, 'bagging_freq': 3, 'num_leaves': 85, 'max_depth': 16, 'min_child_samples': 23}
+2025-07-17 02:12:45 | Trial 15 | RMSE: 0.17714 | Params: {'learning_rate': 0.02020680797402069, 'feature_fraction': 0.9928631392987826, 'bagging_fraction': 0.902976425255374, 'bagging_freq': 3, 'num_leaves': 100, 'max_depth': 16, 'min_child_samples': 21}
+2025-07-17 02:15:43 | Trial 16 | RMSE: 0.17037 | Params: {'learning_rate': 0.044117021220476234, 'feature_fraction': 0.9426107669793522, 'bagging_fraction': 0.8033536757878562, 'bagging_freq': 2, 'num_leaves': 90, 'max_depth': 12, 'min_child_samples': 34}
+2025-07-17 02:18:26 | Trial 17 | RMSE: 0.17443 | Params: {'learning_rate': 0.03577634465499331, 'feature_fraction': 0.8966848367473202, 'bagging_fraction': 0.8834825823630748, 'bagging_freq': 2, 'num_leaves': 63, 'max_depth': 15, 'min_child_samples': 10}
+2025-07-17 02:21:38 | Trial 18 | RMSE: 0.17303 | Params: {'learning_rate': 0.045683481130454014, 'feature_fraction': 0.8169044969179164, 'bagging_fraction': 0.9247576620950319, 'bagging_freq': 4, 'num_leaves': 86, 'max_depth': 13, 'min_child_samples': 24}
+2025-07-17 02:24:17 | Trial 19 | RMSE: 0.17255 | Params: {'learning_rate': 0.036977917480822395, 'feature_fraction': 0.9624395702313554, 'bagging_fraction': 0.7918978703840333, 'bagging_freq': 2, 'num_leaves': 73, 'max_depth': 18, 'min_child_samples': 31}
+2025-07-17 02:27:03 | Trial 20 | RMSE: 0.17650 | Params: {'learning_rate': 0.023499921746708514, 'feature_fraction': 0.8754218067546085, 'bagging_fraction': 0.8680269999458602, 'bagging_freq': 3, 'num_leaves': 95, 'max_depth': 16, 'min_child_samples': 50}
+2025-07-17 02:29:57 | Trial 21 | RMSE: 0.17003 | Params: {'learning_rate': 0.049725400764436295, 'feature_fraction': 0.909156239707195, 'bagging_fraction': 0.8483894885605562, 'bagging_freq': 5, 'num_leaves': 80, 'max_depth': 18, 'min_child_samples': 26}
+2025-07-17 02:32:39 | Trial 22 | RMSE: 0.17103 | Params: {'learning_rate': 0.045853266317986675, 'feature_fraction': 0.9118127060820791, 'bagging_fraction': 0.7558663396413794, 'bagging_freq': 5, 'num_leaves': 85, 'max_depth': 19, 'min_child_samples': 17}
+2025-07-17 02:35:34 | Trial 23 | RMSE: 0.17354 | Params: {'learning_rate': 0.04150626744532, 'feature_fraction': 0.832153632067177, 'bagging_fraction': 0.9015797807400622, 'bagging_freq': 5, 'num_leaves': 79, 'max_depth': 17, 'min_child_samples': 30}
+2025-07-17 02:38:01 | Trial 24 | RMSE: 0.17338 | Params: {'learning_rate': 0.04639104957399259, 'feature_fraction': 0.8827474553165184, 'bagging_fraction': 0.7713317372285029, 'bagging_freq': 6, 'num_leaves': 57, 'max_depth': 20, 'min_child_samples': 37}
+2025-07-17 02:40:31 | Trial 25 | RMSE: 0.17063 | Params: {'learning_rate': 0.049282803777152995, 'feature_fraction': 0.9743635843808949, 'bagging_fraction': 0.7355287621897367, 'bagging_freq': 4, 'num_leaves': 69, 'max_depth': 19, 'min_child_samples': 20}
+2025-07-17 02:43:28 | Trial 26 | RMSE: 0.17144 | Params: {'learning_rate': 0.038908235788419496, 'feature_fraction': 0.9235446663794783, 'bagging_fraction': 0.8278722488129076, 'bagging_freq': 2, 'num_leaves': 90, 'max_depth': 17, 'min_child_samples': 26}
+2025-07-17 02:46:47 | Trial 27 | RMSE: 0.16989 | Params: {'learning_rate': 0.044065081721341194, 'feature_fraction': 0.9574004531107477, 'bagging_fraction': 0.931578731807756, 'bagging_freq': 3, 'num_leaves': 98, 'max_depth': 15, 'min_child_samples': 32}
+2025-07-17 02:48:48 | Trial 28 | RMSE: 0.17428 | Params: {'learning_rate': 0.04678617825662495, 'feature_fraction': 0.8687685200875246, 'bagging_fraction': 0.8935068585835004, 'bagging_freq': 7, 'num_leaves': 79, 'max_depth': 18, 'min_child_samples': 43}
+2025-07-17 02:51:45 | Trial 29 | RMSE: 0.17529 | Params: {'learning_rate': 0.04233090732994871, 'feature_fraction': 0.8506310820926256, 'bagging_fraction': 0.9263380700758086, 'bagging_freq': 3, 'num_leaves': 68, 'max_depth': 16, 'min_child_samples': 24}
+2025-07-17 02:51:45 | >> Optuna 최적화 완료. 총 30번의 trial 실행.
+2025-07-17 02:51:45 | >> 최적 RMSE: 0.16905
+2025-07-17 02:51:45 | >> 최적 하이퍼파라미터: {'learning_rate': 0.04871443094969133, 'feature_fraction': 0.9140552399216154, 'bagging_fraction': 0.8841587359791807, 'bagging_freq': 3, 'num_leaves': 100, 'max_depth': 20, 'min_child_samples': 35}
+2025-07-17 02:51:45 | >> 최적 파라미터를 '../../data/processed/params/best_params_7.json'에 저장했습니다.
+2025-07-17 02:51:45 | >> [5단계 완료] 하이퍼파라미터 최적화 성공.
+2025-07-17 02:51:45 | >> [6단계 시작] 최종 모델 학습 및 예측을 시작합니다. (CV 폴드 수: 4)
+2025-07-17 02:51:45 | >> 최종 학습 파라미터 (미세 조정 적용 및 GPU 적용): {'learning_rate': 0.03897154475975306, 'feature_fraction': 0.9140552399216154, 'bagging_fraction': 0.8841587359791807, 'bagging_freq': 3, 'num_leaves': 100, 'max_depth': 20, 'min_child_samples': 35, 'n_estimators': 3000, 'device': 'cuda', 'objective': 'regression_l1', 'metric': 'rmse', 'verbose': -1, 'n_jobs': -1, 'seed': 42}
+2025-07-17 02:51:45 | --- Fold 1/4 학습 시작 ---
+2025-07-17 02:51:45 | - Train Index: 0 ~ 222020 (size: 222021)
+2025-07-17 02:51:45 | - Validation Index: 222021 ~ 444040 (size: 222020)
+2025-07-17 02:54:24 | - Fold 1 RMSE: 0.18847
+2025-07-17 02:54:24 | - Best Iteration: 3000
+2025-07-17 02:54:24 | --- Fold 2/4 학습 시작 ---
+2025-07-17 02:54:24 | - Train Index: 0 ~ 444040 (size: 444041)
+2025-07-17 02:54:24 | - Validation Index: 444041 ~ 666060 (size: 222020)
+2025-07-17 02:57:54 | - Fold 2 RMSE: 0.10477
+2025-07-17 02:57:54 | - Best Iteration: 3000
+2025-07-17 02:57:54 | --- Fold 3/4 학습 시작 ---
+2025-07-17 02:57:54 | - Train Index: 0 ~ 666060 (size: 666061)
+2025-07-17 02:57:54 | - Validation Index: 666061 ~ 888080 (size: 222020)
+2025-07-17 03:02:13 | - Fold 3 RMSE: 0.08552
+2025-07-17 03:02:13 | - Best Iteration: 3000
+2025-07-17 03:02:13 | --- Fold 4/4 학습 시작 ---
+2025-07-17 03:02:13 | - Train Index: 0 ~ 888080 (size: 888081)
+2025-07-17 03:02:13 | - Validation Index: 888081 ~ 1110100 (size: 222020)
+2025-07-17 03:07:22 | - Fold 4 RMSE: 0.16608
+2025-07-17 03:07:22 | - Best Iteration: 3000
+2025-07-17 03:07:22 | >> CV 학습 결과 요약:
+2025-07-17 03:07:22 | - 각 Fold별 RMSE: [0.18847, 0.10477, 0.08552, 0.16608]
+2025-07-17 03:07:22 | - 평균 Fold RMSE: 0.13621 (±0.04237)
+2025-07-17 03:07:22 | - 전체 OOF RMSE: 0.14265
+2025-07-17 03:07:22 | >> [6단계 완료] 최종 모델 학습 성공.
+2025-07-17 03:07:22 | >> [7단계 시작] 제출 파일 생성 및 모델 저장을 시작합니다.
+2025-07-17 03:07:22 | >> [오류] 7단계(제출 및 저장) 중 문제 발생: name 'test_preds' is not defined
+2025-07-17 03:07:22 | ============================================================
+2025-07-17 03:07:22 | 🎉 모든 프로세스가 성공적으로 종료되었습니다.
+2025-07-17 03:07:22 | ============================================================
