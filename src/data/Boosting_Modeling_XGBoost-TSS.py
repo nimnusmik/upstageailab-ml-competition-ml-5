@@ -191,16 +191,19 @@ model_xgb = XGBRegressor(random_state=123, objective='reg:squarederror')
 #     'colsample_bytree': [1.0],
 # }
 
-# 첫번째 학습 시도 -> Best params = 
+# Search 1
 params = {
     'n_estimators': [1000],     # early stopping 할 것이므로 크게 설정
     'learning_rate': [0.1],
     'max_depth': [5, 7, 9],
-    'gamma': [0, 0.1],
+    'gamma': [0],
     'min_child_weight': [5, 7],
     'subsample': [0.7, 1.0],
-    'colsample_bytree': [0.7, 1.0]
+    'colsample_bytree': [1.0]
 }
+# => Best params =  {'colsample_bytree': 1.0, 'gamma': 0, 'learning_rate': 0.1, 'max_depth': 9, 'min_child_weight': 5, 'n_estimators': 1000, 'subsample': 1.0}
+# Train / Valid / Test RMSE : 13187.70 / 25693.88 / 27692.26
+
 
 model_xgb_cv = GridSearchCV(estimator=model_xgb, param_grid=params, 
                             cv=tscv, scoring='neg_root_mean_squared_error',   
