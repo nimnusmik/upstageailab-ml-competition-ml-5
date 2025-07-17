@@ -180,25 +180,24 @@ test_df_scaled = pd.DataFrame(test_df_scaled, columns=X_col, index=test_df.index
 
 
 #%%
-##### TEST CELL #####
-# 데이터 flat한지확인용(분기잘되는지)
-model = LGBMRegressor(
-    max_depth=10,
-    min_child_samples=1,
-    subsample=1.0,
-    colsample_bytree=1.0,
-    n_estimators=100,
-    random_state=123,
+# ##### TEST CELL #####
+# # 데이터 flat한지확인용(분기잘되는지)
+# model = LGBMRegressor(
+#     max_depth=10,
+#     min_child_samples=1,
+#     subsample=1.0,
+#     colsample_bytree=1.0,
+#     n_estimators=100,
+#     random_state=123
+# )
+# model.fit(X_train_scaled, Y_train)
 
-)
-model.fit(X_train_scaled, Y_train)
 
-
-# 시각화
-plt.figure(figsize=(10, 6))
-plt.barh(X_train.columns, model.feature_importances_)
-plt.title("Feature Importances")
-plt.show()
+# # 시각화
+# plt.figure(figsize=(10, 6))
+# plt.barh(X_train.columns, model.feature_importances_)
+# plt.title("Feature Importances")
+# plt.show()
 
 
 #%%
@@ -209,7 +208,7 @@ model_lgbm = LGBMRegressor(random_state=123, n_jobs=-1)
 # params = {
 #     'n_estimators': [100],
 #     'learning_rate': [0.01, 0.1],
-#     'max_depth': [10],
+#     'max_depth': [5],
 #     'min_child_samples': [5],
 #     'subsample': [1.0],
 #     'colsample_bytree': [1.0],
@@ -217,17 +216,20 @@ model_lgbm = LGBMRegressor(random_state=123, n_jobs=-1)
 #     'reg_lambda': [0.1]
 # }
 
-# 첫번째 학습 시도 -> Best params = 
+# Search 1
 params = {
     'n_estimators': [1000],                    
     'learning_rate': [0.1],       
-    'max_depth': [5, 10],  
+    'max_depth': [5, 7, 9],  
     'min_child_samples': [10, 20],   
     'subsample': [0.7, 1.0],     
     'colsample_bytree': [1.0],  
     'reg_alpha': [0],    
-    'reg_lambda': [0, 0.1]
+    'reg_lambda': [0.1]
 }
+# => Best params = {'colsample_bytree': 1.0, 'learning_rate': 0.1, 'max_depth': 9, 'min_child_samples': 10, 'n_estimators': 1000, 'reg_alpha': 0, 'reg_lambda': 0.1, 'subsample': 0.7}
+# Train / Valid / Test RMSE : 16521 / 34496 / 35467
+
 
 model_lgbm_cv = GridSearchCV(estimator=model_lgbm, param_grid=params, 
                              cv=tscv, scoring='neg_root_mean_squared_error',   
