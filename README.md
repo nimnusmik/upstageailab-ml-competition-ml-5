@@ -2,10 +2,10 @@
 
 ## Team
 
-| ![김선민](https://github.com/user-attachments/assets/263154ec-efa6-473a-bd55-3737fb5741bc) | <img src="https://avatars.githubusercontent.com/u/128503571?v=4](https://avatars.githubusercontent.com/u/128503571?v=4" width="200"> | ![최패캠](https://avatars.githubusercontent.com/u/156163982?v=4) | ![김패캠](https://avatars.githubusercontent.com/u/156163982?v=4) | ![오패캠](https://avatars.githubusercontent.com/u/156163982?v=4) |
+| ![김선민](https://github.com/user-attachments/assets/263154ec-efa6-473a-bd55-3737fb5741bc) | <img src="https://avatars.githubusercontent.com/u/128503571?v=4](https://avatars.githubusercontent.com/u/128503571?v=4" width="200"> | <img src="https://github.com/user-attachments/assets/5c04a858-46ed-4043-9762-b7eaf7b1149a" width="200"> | ![김패캠](https://avatars.githubusercontent.com/u/156163982?v=4) | ![오패캠](https://avatars.githubusercontent.com/u/156163982?v=4) |
 | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: |
-|            [김선민](https://github.com/nimnusmik)             |            [김장원](https://github.com/jkim1209)             |            [최패캠](https://github.com/UpstageAILab)             |            [장윤정](https://github.com/yjjang06)             |            [오패캠](https://github.com/UpstageAILab)             |
-|                            팀장, 담당 역할                             |                            데이터 수집, 전처리, 모델링                             |                            담당 역할                             |                            담당 역할                             |                            담당 역할                             |
+|            [김선민](https://github.com/nimnusmik)             |            [김장원](https://github.com/jkim1209)             |            [최현화](https://github.com/iejob)             |            [장윤정](https://github.com/yjjang06)             |            [오패캠](https://github.com/UpstageAILab)             |
+|                            팀장, 담당 역할                             |                            데이터 수집, 전처리, 모델링                             |                            DE / FE / QA / ML                             |                            담당 역할                             |                            담당 역할                             |
 
 ## 1. Competiton Info
 
@@ -50,8 +50,23 @@ graph TD;
 
 ### Timeline
 
-- ex) July 7, 2025 - Start Date
-- ex) July 17, 2025 - Final submission deadline
+- 모델링 전(7/7–7/11)
+    - 7/7–7/8: 주제 정의·데이터 구조 탐색
+    - 7/9–7/11: 외부 데이터 수집·결측치 처리·피처 엔지니어링
+    - 회의:
+        - 매일 **10:10** 스탠드업 (당일 목표·이슈 공유)
+        - 매일 **18:30** 진행 상황 점검
+    
+- 모델링 전환(7/12–7/13)
+    - 7/12–7/13:
+        - A조 Insight 정리 (타깃 관계 분석·문서화)
+        - B조 Feat Eng 분업 (이상치 처리·스케일링·인코딩·간단 모델링)
+    - 회의: 매일 **18:00** 모델링 준비 회의
+
+- **모델링·최종 검증(7/14–7/17)**
+    - **7/14–7/17**: 모델 학습·추가 피처링 병행·최종 RMSE 검증
+    - **회의**: 매일 **18:00** 결과 공유 회의
+
 
 ### Evaluation
 
