@@ -211,14 +211,39 @@ model_hgb = HistGradientBoostingRegressor(random_state=123)
 #     'max_iter': [300, 500, 700, 1000] 
 # }
 # # Best params -> model_gb_best_params = {'learning_rate': 0.1, 'max_depth': 9, 'max_iter': 1000, 'min_samples_leaf': 20}
+# Train / Test RMSE :  7,546  /  19,296
 
 # Trial #2
+# params = {
+#     'learning_rate': [0.05, 0.1],
+#     'max_depth': [9, 11, 13, 15],  
+#     'min_samples_leaf': [10, 20, 30],  
+#     'max_iter': [1000, 1100, 1200]  
+# }
+# Best params -> model_gb_best_params = {'learning_rate': 0.1, 'max_depth': 15, 'max_iter': 1200, 'min_samples_leaf': 10}
+# Train / Test RMSE :  7,152  /  18,680
+
+# Trial #3
+# params = {
+#     'learning_rate': [0.03, 0.05, 0.07],
+#     'max_depth': [13, 15, 17],
+#     'min_samples_leaf': [5, 10, 15],
+#     'max_iter': [1500, 2000]
+# }
+# Best params -> model_gb_best_params = {'learning_rate': 0.07, 'max_depth': 15, 'max_iter': 2000, 'min_samples_leaf': 10}
+# Train / Test RMSE : 6721  / 17828
+
+# Trial #4
 params = {
-    'learning_rate': [0.1],
-    'max_depth': [9, 11, 13, 15],  
-    'min_samples_leaf': [10, 20, 30],  
-    'max_iter': [1000, 1100, 1200]  
+    'learning_rate': [0.07, 0.08, 0.09, 0.1],
+    'max_depth': [13, 15],
+    'min_samples_leaf': [8, 10], 
+    'max_iter': [2000, 2500, 3000, 3500]
 }
+# Best params -> model_gb_best_params = {'learning_rate': 0.1, 'max_depth': 13, 'max_iter': 3500, 'min_samples_leaf': 8}
+# Train / Test RMSE : 
+
+
 
 model_hgb_cv = GridSearchCV(
     estimator=model_hgb,
