@@ -187,7 +187,7 @@ test_df_scaled[cat_features] = test_df[cat_features].values
 ################################
 #  CatBoost with CV
 ################################
-model_cb = CatBoostRegressor(verbose=500, random_state=123) 
+model_cb = CatBoostRegressor(verbose=100, random_state=123) 
 
 # # 코드 테스트용
 # params = {
@@ -199,17 +199,17 @@ model_cb = CatBoostRegressor(verbose=500, random_state=123)
 #     'colsample_bylevel': [1.0]
 # }  
 
+# Search 1 
 params = {
     'n_estimators': [1000],
-    'learning_rate': [0.1],
-    'max_depth': [4, 6, 8],
-    'l2_leaf_reg': [3, 5],
-    'subsample': [1.0],
+    'learning_rate': [0.05, 0.1],
+    'max_depth': [5, 7, 9],
+    'l2_leaf_reg': [3],
+    'subsample': [0.7],
     'colsample_bylevel': [1.0]
 }  
-
-# best params =
-
+# => Best params = {'colsample_bylevel': 1.0, 'l2_leaf_reg': 3, 'learning_rate': 0.1, 'max_depth': 9, 'n_estimators': 1000, 'subsample': 0.7 }
+# Train / Valid / Test RMSE :  15778  /  29762  /  29209
 
 
 
@@ -220,7 +220,6 @@ model_cb_cv = GridSearchCV(estimator=model_cb, param_grid=params,
 model_cb_cv.fit(
     X_train_scaled, Y_train, 
     cat_features=cat_features,
-    early_stopping_rounds=20
 )
 
 print("CatBoost 최적 하이퍼 파라미터: ", model_cb_cv.best_params_)
@@ -240,7 +239,7 @@ model_cb_cv_final = CatBoostRegressor(
     **model_cb_cv.best_params_,
     random_state=123,
     verbose=100,
-    early_stopping_rounds=20
+    early_stopping_rounds=20,
 )
 
 model_cb_cv_final.fit(
