@@ -197,10 +197,14 @@ model_rf = RandomForestRegressor(random_state=123)
 params = {
     'n_estimators': [200, 300],
     'max_depth': [10, 20],
-    'min_samples_split': [5, 10],
-    'min_samples_leaf': [5, 10],
+    # 'min_samples_split': [5, 10],
+    'min_samples_leaf': [5, 10, 15],
     'max_features': ['sqrt'],
 }
+# => Best params = {'max_depth': 20, 'max_features': 'sqrt', 'min_samples_leaf': 5, 'n_estimators': 200}
+# Train / Test RMSE :  6952  /  20178
+
+
 
 # GridSearchCV 템플릿 생성
 model_rf_cv = GridSearchCV(estimator=model_rf, param_grid=params, 
