@@ -295,6 +295,13 @@ $$
 1. **공변량 시프트(Covariate Shift) 대응**: 학습 데이터(2007~2023.06)와 테스트 데이터(2023.07~09) 간 분포 차이를 인지하고, **최신 데이터(2013년 10월 이후) 중심의 학습**을 통해 성능을 개선했습니다.
 2. **피처의 중요성**: `전용면적`, `계약년월`, `연식`, `강남3구여부`가 예측의 핵심 변수임을 확인했습니다. `자치구` 같은 넓은 범주보다 `좌표`와 `군집` 정보가 더 효과적이었습니다.
 3. **모델 설명 가능성**: 모델의 예측 성능만큼 **‘왜’** 그렇게 예측하는지 이해하는 과정이 모델 신뢰도 제고와 개선에 필수적임을 깨달았습니다.
+<img width="964" height="1563" alt="image" src="https://github.com/user-attachments/assets/a97de1fd-f6dd-4148-b004-17b3cb60fa64" />
+<img width="2163" height="1086" alt="image" src="https://github.com/user-attachments/assets/868116fc-f04a-4cdb-9a5b-3b9b15e669b4" />
+
+<img width="1288" height="754" alt="image" src="https://github.com/user-attachments/assets/1e5a0fa0-ff38-4868-b6c6-7d8bce86ae3e" />
+<img width="1362" height="754" alt="image" src="https://github.com/user-attachments/assets/53a6742c-89ec-4508-8e73-8ae14ab0ba7a" />
+<img width="2798" height="1447" alt="image" src="https://github.com/user-attachments/assets/8cf2350f-6a19-4fa7-9579-7dc7a59cfee9" />
+<img width="1944" height="1172" alt="image" src="https://github.com/user-attachments/assets/3d04c8b2-5bad-43f5-95da-14e5bce708ac" />
 
 ---
 
