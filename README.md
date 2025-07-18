@@ -77,31 +77,6 @@ graph TD;
 
 ### Directory
 
-📦ML_team5
- ┣ 📂.github
- ┣ 📂src
- ┃ ┗ 📂data
- ┃ ┃ ┣ 📂archive
- ┃ ┃ ┃ ┣ 📜03.EDA(backup).py
- ┃ ┃ ┃ ┣ 📜04.FeatureEngineering(backup).py
- ┃ ┃ ┃ ┣ 📜05-1.RFModeling.py
- ┃ ┃ ┃ ┣ 📜05-1.RFModeling_HP.py
- ┃ ┃ ┃ ┣ 📜05-2.CBModeling(2).py
- ┃ ┃ ┃ ┗ 📜05-2.CBModeling.py
- ┃ ┃ ┣ 📜01.data_download.py
- ┃ ┃ ┣ 📜02.data_clean.py
- ┃ ┃ ┣ 📜03.EDA.py
- ┃ ┃ ┣ 📜04.FeatureEngineering.py
- ┃ ┃ ┣ 📜05.Modeling.py
- ┃ ┃ ┣ 📜06.Model_tuning.py
- ┃ ┃ ┣ 📜Interactive - 05.Modeling.py.ipynb
- ┃ ┃ ┗ 📜requirements.txt
- ┣ 📜.gitignore
- ┣ 📜PRD.md
- ┣ 📜README.md
- ┣ 📜flow.mmd
- ┗ 📜requirements.txt
-
 ## 3. Data descrption
 
 ### Dataset overview
