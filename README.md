@@ -69,8 +69,77 @@ graph TD;
     - **회의**: 매일 **18:00** 결과 공유 회의
 
 
-### Evaluation
+### Dev Environments
 
+```bash
+.
+├── data
+│ ├── logs
+│ │ ├── geocoding_logs
+│ │ ├── price_prediction_logs
+│ │ └── transportation-features_logs
+│ ├── processed
+│ │ ├── cleaned_data
+│ │ ├── geocoding
+│ │ ├── params
+│ │ ├── price-prediction
+│ │ ├── submissions
+│ │ └── transportation-features
+│ └── raw
+├── docs
+│ └── pdf
+├── font
+│ └── NanumFont
+├── images
+│ └── price_prediction_hyunhwa
+├── model
+│ └── price_prediction_hyunhwa
+├── notebooks
+│ ├── csv
+│ ├── geocoding-missing-coords
+│ ├── price-prediction
+│ └── transportation-features
+└── src
+├── data
+└── log
+└── pycache
+```
+
+## 디렉토리별 설명
+
+1. data: 프로젝트의 모든 데이터(csv) 관련 파일 보관소
+    
+    • logs: 지오코딩·모델 학습·교통 피처 생성 과정의 로그
+    
+    • processed: 클리닝·지오코딩·파라미터·최종 예측·제출 파일 등 가공 데이터
+    
+    • raw: 제공받은 원본 CSV 파일(bus_feature, loanrate, population, subway_feature, train/test.csv)
+    
+
+1. docs: 프로젝트 산출물 및 템플릿용 PPT 파일
+2. font : NanumGothic 폰트 파일
+3. images: 모델별 시각화 이미지(피처 중요도, SHAP, 학습 곡선 등)
+4. model: 버전별 학습된 모델 객체(.pkl)
+5. notebooks: 주피터 파일 저장
+    
+    • csv: CSV 비교·리사이즈·제출 포맷용 실험 노트북
+    
+    • geocoding-missing-coords: 좌표 결측치 탐색 및 지오코딩 노트북
+    
+    • transportation-features: 교통 관련 파생변수 생성 노트북
+    
+    • price-prediction: 1~9버전 모델링 실험 노트북
+    
+6. src: python 파일 저장
+    
+    • data: 데이터 다운로드·정제·피처 엔지니어링·모델링 스크립트
+    
+    • log: 로거 구현 및 캐시 파일(**pycache**)
+
+
+---
+
+### Evaluation
 - _Write how to evaluate model_
 
 ## 2. Components
