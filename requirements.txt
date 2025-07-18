@@ -1,3 +1,4 @@
+catboost==1.2.8
 eli5==0.13.0
 graphviz==0.20.1
 ipykernel==6.27.1
@@ -26,4 +27,3 @@ torchelastic==0.2.2
 torchvision==0.16.0
 tqdm==4.66.1
 wget==3.2
-catboost==1.2.8
