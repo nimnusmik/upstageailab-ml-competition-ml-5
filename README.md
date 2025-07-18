@@ -6,9 +6,8 @@
 | ![김선민](https://github.com/user-attachments/assets/263154ec-efa6-473a-bd55-3737fb5741bc) | <img src="https://avatars.githubusercontent.com/u/128503571?v=4](https://avatars.githubusercontent.com/u/128503571?v=4" width="200"> | <img src="https://github.com/user-attachments/assets/5c04a858-46ed-4043-9762-b7eaf7b1149a" width="200"> | ![장윤정](https://github.com/user-attachments/assets/af6a9ff5-56fc-4cd5-b61e-61269a24278d) |
 | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: |
 | [김선민](https://github.com/nimnusmik) | [김장원](https://github.com/jkim1209) | [최현화](https://github.com/iejob) | [장윤정](https://github.com/yjjang06) |
-| 팀장, 담당 역할 | 데이터 수집, 전처리, 모델링 | DE / FE / QA / ML | 모델링 |
+| 팀 매니징 및 모델링 | 데이터 수집, 전처리, 모델링, 발표 | DE / FE / QA / ML, 깃헙 관리 | 모델링 |
 
-## 1. Competiton Info
 
 ## Overview
 
@@ -138,8 +137,6 @@ graph TD;
     • log: 로거 구현 및 캐시 파일(**pycache**)
 
 
----
-
 ## EDA
 1. 결측치 현황 파악
   - 전체 52개 컬럼 중 41개 컬럼 결측치 존재
@@ -176,7 +173,6 @@ graph TD;
   - 인구수 관련 변수 : `총인구수`, `성비(남/여)` 추가
   - 대출금리 관련 변수 : `loanrate_1m`, `loanrate_3m`, `loanrate_6m`, `loanrate_12m` 추가
 
----
 
 ## Modeling
 
@@ -213,13 +209,13 @@ $$
 <img width="948" height="552" alt="Screenshot 2025-07-18 at 12 40 25" src="https://github.com/user-attachments/assets/21b2021a-79a7-48c1-b5a0-789c12451bb5" />
 
 
-### Presentation
+---
+## Presentation
 
 - [PPTLink](https://docs.google.com/presentation/d/1wBqAXndFJrGyTBmdimtKoiKXMXfscTrOSici77yqrlU/edit?usp=sharing)
 
-## etc
 
-### Meeting Log
+## Meeting Log
 
 - [notion](https://www.notion.so/5-3X-Y-21d40cb3731d80f18df4e07c93787261?source=copy_link)
 
