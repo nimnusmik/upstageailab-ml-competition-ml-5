@@ -10,7 +10,8 @@
 
 ## 1. Competiton Info
 
-### Overview
+## Overview
+
 - 본 아파트 가격 예측 챌린지는 참가자들이 서울 아파트의 실제 거래 가격을 정확하고 일반화된 모델로 예측하는 것을 목표로 합니다.
 
 미리 시장 동향을 예측함으로써, 모델은 현명한 부동산 의사결정을 돕고 공정하며 효율적인 거래를 촉진할 수 있습니다. 참가자들은 또한 데이터 과학 및 머신러닝 분야에서 실질적인 경험을 쌓고, 다양한 아파트 특성 간의 관계를 탐구할 수 있습니다.
@@ -49,7 +50,7 @@ graph TD;
 
 ```
 
-### Timeline
+## Timeline
 
 - 모델링 전(7/7–7/11)
     - 7/7–7/8: 주제 정의·데이터 구조 탐색
@@ -105,7 +106,7 @@ graph TD;
 └── pycache
 ```
 
-## 디렉토리별 설명
+### Directory Description 
 
 1. data: 프로젝트의 모든 데이터(csv) 관련 파일 보관소
     
@@ -177,7 +178,18 @@ graph TD;
 
 ---
 
-### Evaluation
+## Modeling
+
+팀원 개인별로 모델링 진행하여 각자 한번씩 데이터 분석 사이클을 처음부터 끝까지 경험하는 것을 목표로 함
+이후, 최종 모델은 성능(RMSE)이 가장 잘 나오는 모델로 선택
+
+- **김장원** : Random Forest, Gradient Boosting, XGBoost, LightGBM, CatBoost / Stacking, Voting 기법 
+- 최현화 :  LightGBM & CatBoost 앙상블
+- 김선민 :  RandomForest, Catboost, AutoInt
+- 장유정 :  Linear, RandomForest, XGBoost, LightGBM
+
+
+## Evaluation
 
 #### RMSE (Root Mean Squared Error)
 
@@ -190,22 +202,24 @@ $$
 * $\hat{y}_i$: 모델의 예측 가격
 
 
-## 5. Result
+---
+
+## Result
 
 ### Leader Board
 
-> 최종 점수: 46950.6270
+> 최종 점수: [5위] 46950.6270
+
+<img width="948" height="552" alt="Screenshot 2025-07-18 at 12 40 25" src="https://github.com/user-attachments/assets/21b2021a-79a7-48c1-b5a0-789c12451bb5" />
 
 
 ### Presentation
 
-- _Insert your presentaion file(pdf) link_
+- [PPTLink](https://docs.google.com/presentation/d/1wBqAXndFJrGyTBmdimtKoiKXMXfscTrOSici77yqrlU/edit?usp=sharing)
 
 ## etc
 
 ### Meeting Log
 
 - [notion](https://www.notion.so/5-3X-Y-21d40cb3731d80f18df4e07c93787261?source=copy_link)
-### Reference
 
-- _Insert related reference_
