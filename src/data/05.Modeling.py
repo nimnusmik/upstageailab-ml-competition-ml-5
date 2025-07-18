@@ -272,7 +272,7 @@ print(submission_df.info())
 
 # %%
 # 저장 
-submission_df.to_csv('/data/ephemeral/home/aibootcamp14/upstageailab-ml-competition-ml-5/data/processed/submissions/submission_AutoInt_0717.csv', index=False)
+submission_df.to_csv('/data/ephemeral/home/aibootcamp14/upstageailab-ml-competition-ml-5/data/processed/submissions/jangwon/submission_AutoInt_0717.csv', index=False)
 print("\n--- submission_AutoInt.csv 파일이 성공적으로 생성되었습니다. ---")
 
 # %%
@@ -415,7 +415,7 @@ print(submission_df.info())
 
 # %%
 # 저장 
-submission_df.to_csv('/data/ephemeral/home/aibootcamp14/upstageailab-ml-competition-ml-5/data/processed/submissions/submission_AutoInt_0717(2).csv', index=False)
+submission_df.to_csv('/data/ephemeral/home/aibootcamp14/upstageailab-ml-competition-ml-5/data/processed/submissions/jangwon/submission_AutoInt_0717(2).csv', index=False)
 print("\n--- submission_AutoInt(2).csv 파일이 성공적으로 생성되었습니다. ---")
 # 105320.2558
 
@@ -557,6 +557,6 @@ print(submission_df.info())
 
 # %%
 # 저장 
-submission_df.to_csv('/data/ephemeral/home/aibootcamp14/upstageailab-ml-competition-ml-5/data/processed/submissions/submission_AutoInt_0717(3).csv', index=False)
+submission_df.to_csv('/data/ephemeral/home/aibootcamp14/upstageailab-ml-competition-ml-5/data/processed/submissions/jangwon/submission_AutoInt_0717(3).csv', index=False)
 print("\n--- submission_AutoInt(3).csv 파일이 성공적으로 생성되었습니다. ---")
 # 점수:
