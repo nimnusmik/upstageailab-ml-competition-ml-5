@@ -1,6 +1,23 @@
 # 🏠 Seoul House Price ML Challenge
 
+본 프로젝트는 2025년 7월 진행된 **서울시 아파트 실거래가 예측** 머신러닝 경진대회의 결과물입니다. 회귀(Regression) 문제 해결을 목표로, 데이터 엔지니어링부터 모델링, 협업까지 전 과정을 담았습니다.
+
+## 🚀 핵심 요약 (TL;DR)
+
+- **주제**: 서울시 아파트 실거래가 예측을 위한 머신러닝 회귀 모델 개발
+- **팀**: `3X+Y` (AI·통계·컴퓨터공학 전공 4인)
+- **주요 기술**: Feature Engineering, Time Series CV, Ensemble (Voting, Stacking), XGBoost, LightGBM, CatBoost
+- **핵심 성과**: 최종 RMSE **46,950** (대회 5위), 체계적인 협업 프로세스 구축
+- **핵심 교훈**: 데이터 품질의 중요성, 시계열 특성 고려의 필요성, 모델 설명 가능성의 가치
+
 ## Team
+
+## 👨‍💻 팀: 3X+Y
+
+> "한 줄의 코드, 한 뼘의 통찰. 정확한 예측 모델을 향하여!"
+> 
+
+‘3X+Y’는 팀원들의 MBTI 유형 분포가 ‘3:1’인 점에서 착안한 이름입니다. AI, 금융·통계, 컴퓨터공학 등 다양한 배경을 가진 팀원들이 모여 시너지를 만들었습니다.
 
 
 | ![김선민](https://github.com/user-attachments/assets/263154ec-efa6-473a-bd55-3737fb5741bc) | <img src="https://avatars.githubusercontent.com/u/128503571?v=4](https://avatars.githubusercontent.com/u/128503571?v=4" width="200"> | <img src="https://github.com/user-attachments/assets/5c04a858-46ed-4043-9762-b7eaf7b1149a" width="200"> | ![장윤정](https://github.com/user-attachments/assets/af6a9ff5-56fc-4cd5-b61e-61269a24278d) |
@@ -48,6 +65,18 @@ graph TD;
     I --> Q[발표];
 
 ```
+
+## 🤝 협업 방식 및 도구
+
+**열린 소통, 상호 존중, 책임감, 주도성**을 핵심 가치로 삼았습니다.
+
+- **Communication**: 매일 2회 정기 미팅(오전/오후) 및 **Slack**을 통한 실시간 소통
+- **Task Management**: **GitHub Issues** (약 70개) 및 **Projects**를 활용한 체계적 업무 관리
+- **Documentation**: **Notion**을 중앙 허브로 사용하여 회의록, 아이디어, To-Do 리스트 기록
+- **Version Control**: **GitHub**를 ‘단일 진실 소스(Central Source of Truth)’로 삼고, 기능별 브랜치와 PR 워크플로우를 철저히 준수
+- **Data & Asset Sharing**: **Google Drive**로 데이터셋 및 발표 자료 공유
+
+---
 
 ## Timeline
 
@@ -173,49 +202,125 @@ graph TD;
   - 인구수 관련 변수 : `총인구수`, `성비(남/여)` 추가
   - 대출금리 관련 변수 : `loanrate_1m`, `loanrate_3m`, `loanrate_6m`, `loanrate_12m` 추가
 
+## Modeling 전략
 
-## Modeling
+- 모델: XGBoost, LightGBM, CatBoost, RandomForest, Stacking, Voting
+- 교차검증: 시계열 기반 K-Fold 적용
+- 타겟 변수 로그 변환(np.log1p)
+- 성능 개선 전략:
+    - 성능 낮은 컬럼 제거(Lasso 회귀 기반)
+    - 시계열 특성 고려한 학습·검증
+    - Voting/Stacking 앙상블 적용
+    - AutoInt(DeepCTR) 모델 실험 → 복잡한 비선형 피처 간 상호작용 고려
+- **교차 검증**: 시계열 데이터의 특성을 고려하여 **Time Series K-Fold CV**를 적용, 일반화 성능 확보
+- **타겟 변환**: 가격(`target`) 분포의 왜도를 줄이기 위해 **로그 변환 (`np.log1p`)** 을 적용
+- **앙상블**: 최종적으로 **Voting** 및 **Stacking** 앙상블을 통해 모델의 안정성과 정확도를 높임
+- **딥러닝 실험**: **AutoInt** 모델을 도입하여 고차원 피처 상호작용 학습을 시도함
 
-팀원 개인별로 모델링 진행하여 각자 한번씩 데이터 분석 사이클을 처음부터 끝까지 경험하는 것을 목표로 함
-이후, 최종 모델은 성능(RMSE)이 가장 잘 나오는 모델로 선택
+---
 
-- **김장원** : Random Forest, Gradient Boosting, XGBoost, LightGBM, CatBoost / Stacking, Voting 기법 
-- 최현화 :  LightGBM & CatBoost 앙상블
-- 김선민 :  RandomForest, Catboost, AutoInt
-- 장유정 :  Linear, RandomForest, XGBoost, LightGBM
+## 분석 인사이트 및 결과
 
+- 공변량 시프트 문제 해결:
+    - train: 2007~2023.06 / test: 2023.07~09 간 차이
+    - train 데이터의 후반부만 사용하여 일반화 성능 확보
+- 중요 피처:
+    - 전용면적, 계약년월, 연식, 강남3구여부
+- 주요 개선:
+    - 자치구 대신 좌표 사용
+    - 교통변수는 가중치합 사용
+    - 모델 성능 향상에 기여하지 못한 컬럼 제거
+    - Lasso 회귀로 불필요 피처 제거
+- RMSE 개선:
+    - 최종 제출 모델 GB_v4 기준 RMSE: **46950.62**
+
+**김장원 – 선형 및 비선형 모델을 통한 인사이트**
+
+- LASSO 회귀를 이용해 변수 중요도를 파악, ‘인구비중’, ‘자치구_구로구’ 등 중요하지 않은 변수 제외
+- 시계열 데이터 특성을 고려하지 않은 무작위 K-Fold 검증에서 발생한 성능 격차 문제 발견
+- 자치구 변수 대신 좌표(X, Y) 변수로 대체하고, 교통 관련 변수는 가중합으로 통합하여 모델 성능 개선
+- 다양한 모델 성능 비교 결과, LightGBM과 CatBoost가 우수한 성능을 보였으며, 앙상블(스태킹, 보팅) 기법은 모델간 예측 안정성을 높임
+- 잔차 분석을 통해 일부 관측치에 대해 추가 개선 필요성을 인지
+
+**김선민 – 데이터 시계열 특성 및 피처 개선 인사이트**
+
+- 훈련 데이터와 테스트 데이터 간 공변량 시프트 문제 확인 (훈련 데이터는 장기간, 테스트 데이터는 최근 3개월 집중)
+- ‘전용면적’, ‘계약년월’, ‘연식’, ‘강남3구 여부’가 핵심 변수임을 확인
+- 시계열 차이를 반영한 피처 생성 및 불필요 변수 제거로 모델 신뢰성 및 성능 향상
+- 딥러닝 모델(AutoInt)을 도입해 복잡한 비선형 상호작용 학습 시도, 하지만 L2 규제 등 모델 일반화 한계도 발견
+
+**장윤정 – 다양한 모델 실험 및 지역 변수 처리**
+
+- Linear, RandomForest, XGBoost, LightGBM 등 다양한 모델 실험
+- XGBoost가 가장 우수한 성능을 보였고, 시군구 지역 변수는 카디널리티 문제로 직접 적용 어려워 ‘강남3구 여부’ 파생 변수 활용
+- 예측값과 실제값 간 회귀선 분석을 통해 절편 문제 및 추가 개선점 도출
+
+**최현화 – 피처 엔지니어링 및 모델링 개선**
+
+- K-Means 군집화를 통해 지리적·물리적 유사 아파트 군집 생성
+- 전용면적과 건물나이의 상호작용 피처가 가격 예측 핵심임을 확인
+- 기존 무작위 데이터 분할에 의한 비현실적 성능 지표 문제를 발견하고 시계열 기반 검증 도입
+- 단일 모델 편향성 문제를 인지하고 LightGBM과 CatBoost 앙상블로 예측 안정성 향상
+- 모델 설명 가능성 및 신뢰성 확보를 위해 ‘왜’ 예측하는지에 대한 이해 중요성 강조
+
+---
 
 ## Evaluation
 
-#### RMSE (Root Mean Squared Error)
+### RMSE (Root Mean Squared Error)
 
 $$
 \text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2}
 $$
 
-* $N$: 데이터 포인트의 수
-* $y_i$: 실제 가격
-* $\hat{y}_i$: 모델의 예측 가격
+- $N$: 데이터 포인트의 수
+- $y_i$: 실제 가격
+- $\hat{y}_i$: 모델의 예측 가격
 
+### Meeting Log
+
+- [notion](https://www.notion.so/21d40cb3731d80f18df4e07c93787261?pvs=21)
+
+---
+
+## 📊 결과 및 주요 인사이트
+
+### 최종 결과
+
+- **Evaluation Metric**: RMSE (Root Mean Squared Error)
+- **Leader Board Score**: **46950.6270** (5위)
+
+### 핵심 인사이트
+
+1. **공변량 시프트(Covariate Shift) 대응**: 학습 데이터(2007~2023.06)와 테스트 데이터(2023.07~09) 간 분포 차이를 인지하고, **최신 데이터(2013년 10월 이후) 중심의 학습**을 통해 성능을 개선했습니다.
+2. **피처의 중요성**: `전용면적`, `계약년월`, `연식`, `강남3구여부`가 예측의 핵심 변수임을 확인했습니다. `자치구` 같은 넓은 범주보다 `좌표`와 `군집` 정보가 더 효과적이었습니다.
+3. **모델 설명 가능성**: 모델의 예측 성능만큼 **‘왜’** 그렇게 예측하는지 이해하는 과정이 모델 신뢰도 제고와 개선에 필수적임을 깨달았습니다.
 
 ---
 
-## Result
+## 💡 회고 (Retrospective)
 
-### Leader Board
+### 잘한 점 (What went well)
 
-> 최종 점수: [5위] 46950.6270
+- **체계적인 협업**: GitHub 중심의 워크플로우와 다양한 협업 도구를 통해 투명하고 효율적인 소통 문화를 구축했습니다.
+- **역량 강화**: 팀원 모두가 데이터 처리부터 모델링까지 전 과정을 직접 경험하며 실무 역량을 크게 강화했습니다.
 
-<img width="948" height="552" alt="Screenshot 2025-07-18 at 12 40 25" src="https://github.com/user-attachments/assets/21b2021a-79a7-48c1-b5a0-789c12451bb5" />
+### 아쉬운 점 (What could be improved)
 
+- **시간 관리**: 피처 엔지니어링에 많은 시간을 할애하여 다양한 모델을 깊이 있게 실험할 시간이 부족했습니다.
+- **결과 분석**: 최종 제출 전, 예측 결과를 충분히 분석하고 개선할 기회를 놓친 점이 아쉽습니다.
 
----
-## Presentation
+### 팀원별 소감
 
-- [PPTLink](https://docs.google.com/presentation/d/1wBqAXndFJrGyTBmdimtKoiKXMXfscTrOSici77yqrlU/edit?usp=sharing)
+- **김선민**: 결과 지표에 매몰되기보다, 현상을 깊이 이해하고 ‘왜’를 질문하는 과정의 중요성을 깨달았습니다.
+- **김장원**: "Garbage in, Garbage out." 좋은 데이터와 도메인 지식이 모델 성능을 좌우함을 실감했습니다.
+- **장윤정**: 전반적인 분석/모델링 경험을 통해, 앞으로 더 다양한 가설을 세우고 실험하는 역량을 키우고 싶습니다.
+- **최현화**: 라이브러리 사용을 넘어 모델의 작동 원리를 탐구하고, 문제에 맞는 최적의 해결책을 설계하는 엔지니어가 되겠습니다.
 
+### Reference
 
-## Meeting Log
-
-- [notion](https://www.notion.so/5-3X-Y-21d40cb3731d80f18df4e07c93787261?source=copy_link)
-
+- 한국기업평판연구소: https://brikorea.com/
+- 주택 관련 논문:
+    - https://www.kdi.re.kr/upload/7837/1_1.pdf
+    - https://www.emerald.com/insight/content/doi/10.1108/jfm-02-2016-0003/full/html
+- *Insert related reference*
