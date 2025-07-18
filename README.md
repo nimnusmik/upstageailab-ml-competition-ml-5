@@ -140,36 +140,17 @@ graph TD;
 ---
 
 ### Evaluation
-- _Write how to evaluate model_
 
-## 2. Components
+#### RMSE (Root Mean Squared Error)
 
-### Directory
+$$
+\text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2}
+$$
 
-## 3. Data descrption
+* $N$: 데이터 포인트의 수
+* $y_i$: 실제 가격
+* $\hat{y}_i$: 모델의 예측 가격
 
-### Dataset overview
-
-•	Input: 9,272 records of apartment features and transaction details
-•	Output: Predicted transaction prices for these 9,272 apartments
-
-### EDA
-
-- _Describe your EDA process and step-by-step conclusion_
-
-### Feature engineering
-
-- _Describe feature engineering process_
-
-## 4. Modeling
-
-### Model descrition
-
-- _Write model information and why your select this model_
-
-### Modeling Process
-
-- _Write model train and test process with capture_
 
 ## 5. Result
 
@@ -186,8 +167,7 @@ graph TD;
 
 ### Meeting Log
 
-- _Insert your meeting log link like Notion or Google Docs_
-
+- [notion](https://www.notion.so/5-3X-Y-21d40cb3731d80f18df4e07c93787261?source=copy_link)
 ### Reference
 
 - _Insert related reference_
