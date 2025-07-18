@@ -112,6 +112,11 @@ graph TD;
     - **7/14–7/17**: 모델 학습·추가 피처링 병행·최종 RMSE 검증
     - **회의**: 매일 **18:00** 결과 공유 회의
 
+### Meeting Log
+
+- [notion](https://www.notion.so/21d40cb3731d80f18df4e07c93787261?pvs=21)
+
+---
 
 ### Dev Environments
 
@@ -283,9 +288,11 @@ graph TD;
 - 기존 무작위 데이터 분할에 의한 비현실적 성능 지표 문제를 발견하고 시계열 기반 검증 도입
 - 단일 모델 편향성 문제를 인지하고 LightGBM과 CatBoost 앙상블로 예측 안정성 향상
 - 모델 설명 가능성 및 신뢰성 확보를 위해 ‘왜’ 예측하는지에 대한 이해 중요성 강조
+
 ---
 
-## Evaluation
+## 📊 결과 및 주요 인사이트
+
 
 ### RMSE (Root Mean Squared Error)
 
@@ -297,13 +304,6 @@ $$
 - $y_i$: 실제 가격
 - $\hat{y}_i$: 모델의 예측 가격
 
-### Meeting Log
-
-- [notion](https://www.notion.so/21d40cb3731d80f18df4e07c93787261?pvs=21)
-
----
-
-## 📊 결과 및 주요 인사이트
 
 ### 최종 결과
 
